@@ -70,6 +70,13 @@ Session::Session() {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_t, 0);
 
+            GLuint depth_rbo;
+            glGenRenderbuffers(1, &depth_rbo);
+            glBindRenderbuffer(GL_RENDERBUFFER, depth_rbo);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, SCREEN_W, SCREEN_H);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
+                                      depth_rbo);
+
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
