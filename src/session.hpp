@@ -1,5 +1,7 @@
 #pragma once
 
+#include "pch.hpp" // IWYU pragma: keep
+
 #include "camera.hpp"
 #include "input.hpp"
 #include "mesh_static.hpp"
@@ -20,7 +22,8 @@ struct Session {
     Shader geo;
     Shader result;
 
-    void init();
+    Session();
+
     void update();
     void render();
 };

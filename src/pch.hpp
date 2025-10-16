@@ -49,6 +49,7 @@ using namespace glm;
 #include <stdlib.h>       // IWYU pragma: keep
 #include <string>         // IWYU pragma: keep
 #include <sys/resource.h> // IWYU pragma: keep
+#include <thread>         // IWYU pragma: keep
 #include <unordered_set>  // IWYU pragma: keep
 #include <variant>        // IWYU pragma: keep
 #include <vector>         // IWYU pragma: keep

@@ -22,6 +22,8 @@ bool Window::init() {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
+    SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "1");
+
     const auto ar = aspect_ratio(SCREEN_W, SCREEN_H);
     if (ar.first != 4 || ar.second != 3) {
         throw std::runtime_error(frmt("Illegal screen resolution %d:%d", ar.first, ar.second));
@@ -48,7 +50,7 @@ bool Window::init() {
     glClearColor(0, 0, 0, 1);
 
     // VSYNC.
-    SDL_GL_SetSwapInterval(1);
+    SDL_GL_SetSwapInterval(0);
 
     glEnable(GL_DEPTH_TEST);
 
@@ -64,9 +66,13 @@ void Window::update() {
     last = now;
     now = SDL_GetPerformanceCounter();
     DELTA_TIME = (float)((now - last) / (float)SDL_GetPerformanceFrequency());
+
+    auto fps = 1.0 / DELTA_TIME;
+    if (fps < 59 || fps > 61) {
+        log_warn("Erratic framerate: %.0f", 1 / DELTA_TIME);
+    }
 }
 
 void Window::swap() {
     SDL_GL_SwapWindow(window);
-    glFinish();
 }

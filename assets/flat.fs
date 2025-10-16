@@ -6,8 +6,8 @@ uniform sampler2D depth_t;
 uniform sampler2D normal_t;
 uniform vec2 texel_size;
 
-float depth_sens  = 1;
-float normal_sens = 1;
+float depth_sens  = 1.5;
+float normal_sens = 0.5;
 
 vec2 step = texel_size * 2;
 
@@ -30,12 +30,13 @@ float normal_edge() {
 
 const vec3  YELLOW    = vec3(0.99, 0.67, 0.12);
 const vec3  BLACK     = vec3(0);
-const float threshold = 0.99999;
+const float threshold = 0.5;
 
 void main() {
-    float dEdge = depth_edge(); // > threshold ? 1 : 0;
-    float nEdge = normal_edge();
-    float edge = clamp(dEdge + nEdge, 0, 1);
+    float d_edge = depth_edge() > threshold ? 1 : 0;
+    float n_edge = normal_edge();
+    float edge = d_edge + n_edge;
+    // FragColor = vec4(vec3(edge), 1);
 
     FragColor = vec4(mix(YELLOW, BLACK, edge), 1);
 }

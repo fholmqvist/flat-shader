@@ -13,7 +13,7 @@ GLuint depth_t;
 
 #define uloc(name) glGetUniformLocation(s.ID, name)
 
-void Session::init() {
+Session::Session() {
     log_info("Starting");
     if (!window.init()) {
         throw std::runtime_error("Window failed to initialize");
