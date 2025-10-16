@@ -33,5 +33,7 @@ void main() {
     float nEdge = normal_edge();
     float edge = clamp(dEdge + nEdge, 0, 1);
 
+    edge = smoothstep(0.2, 1.0, edge);
+
     FragColor = vec4(mix(vec3(0.99, 0.67, 0.12), vec3(0), edge), 1);
 }
