@@ -100,8 +100,15 @@ Session::Session() {
             glBindTexture(GL_TEXTURE_2D, sector_t);
             glUniform1i(uloc("sector_t"), 0);
 
-            se.mesh.gl_uniforms(s.ID);
-            glDrawElements(GL_TRIANGLES, se.mesh.indices.size(), GL_UNSIGNED_SHORT, 0);
+            int n = 2;
+
+            for (int y = 0; y < n; y++) {
+                for (int x = 0; x < n; x++) {
+                    se.mesh.world_pos = { x, 0, y };
+                    se.mesh.gl_uniforms(s.ID);
+                    glDrawElements(GL_TRIANGLES, se.mesh.indices.size(), GL_UNSIGNED_SHORT, 0);
+                }
+            }
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         });
