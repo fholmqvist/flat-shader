@@ -28,12 +28,16 @@ float normal_edge() {
     return smoothstep(0, normal_sens * 0.5, diff);
 }
 
+const vec3 YELLOW = vec3(0.99, 0.67, 0.12);
+const vec3 BLACK  = vec3(0);
+
 void main() {
     float dEdge = depth_edge();
     float nEdge = normal_edge();
     float edge = clamp(dEdge + nEdge, 0, 1);
 
-    edge = smoothstep(0.2, 1.0, edge);
+    // float threshold = 0.9999;
+    // edge = (edge > threshold) ? 1.0 : 0.0;
 
-    FragColor = vec4(mix(vec3(0.99, 0.67, 0.12), vec3(0), edge), 1);
+    FragColor = vec4(mix(YELLOW, BLACK, edge), 1);
 }

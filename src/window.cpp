@@ -68,4 +68,5 @@ void Window::update() {
 
 void Window::swap() {
     SDL_GL_SwapWindow(window);
+    glFinish();
 }

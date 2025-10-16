@@ -25,7 +25,7 @@ void Session::init() {
     camera.rot = { -130, -30 };
 
     mesh = MeshStatic::from_scene("assets/room.obj", 0, 0, 0);
-    mesh.apply_perlin({ 0, 0, 0 });
+    mesh.apply_perlin({ 0, 0, 0 }, vec3(0.2));
 
     geo = Shader(
         "assets/flat_geo.vs", "assets/flat_geo.fs",
@@ -120,6 +120,7 @@ void Session::init() {
             glUniform2f(uloc("texel_size"), 1.0f / SCREEN_W, 1.0f / SCREEN_H);
 
             glUniform2f(uloc("resolution"), SCREEN_W, SCREEN_H);
+
             glDrawArrays(GL_TRIANGLES, 0, 6);
         });
 

@@ -88,10 +88,10 @@ MeshStatic MeshStatic::from_scene(std::string file, u32 _diffuse_id, u32 _spectr
 }
 
 void MeshStatic::apply_perlin(vec3 wpos, vec3 strength) {
-    const float zoom = 1.4;
+    const float zoom = 4;
 
     for (auto &v : verts) {
-        auto p = Random::perlin2(wpos.x + (v.pos.x * zoom), wpos.y + (v.pos.z * zoom));
+        auto p = Random::perlin2(wpos.x + (v.pos.x * zoom), wpos.z + (v.pos.z * zoom));
 
         v.pos.x += (p / 8) * strength.x;
         v.pos.z += (p / 8) * strength.z;
