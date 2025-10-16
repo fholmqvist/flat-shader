@@ -6,7 +6,10 @@
 #include "shader.hpp"
 #include "window.hpp"
 
-GLuint gBufferFBO, colorTex, normalTex, depthTex;
+GLuint buffer;
+GLuint color_t;
+GLuint normal_t;
+GLuint depth_t;
 
 #define uloc(name) glGetUniformLocation(s.ID, name)
 
@@ -22,36 +25,36 @@ void Session::init() {
     camera.rot = { -130, -30 };
 
     mesh = MeshStatic::from_scene("assets/room.obj", 0, 0, 0);
+    mesh.apply_perlin({ 0, 0, 0 });
 
     geo = Shader(
         "assets/flat_geo.vs", "assets/flat_geo.fs",
         [this](Shader &) {
-            glGenFramebuffers(1, &gBufferFBO);
-            glBindFramebuffer(GL_FRAMEBUFFER, gBufferFBO);
+            glGenFramebuffers(1, &buffer);
+            glBindFramebuffer(GL_FRAMEBUFFER, buffer);
 
             // main color
-            glGenTextures(1, &colorTex);
-            glBindTexture(GL_TEXTURE_2D, colorTex);
+            glGenTextures(1, &color_t);
+            glBindTexture(GL_TEXTURE_2D, color_t);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_FLOAT,
                          nullptr);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTex,
-                                   0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_t, 0);
 
             // normals
-            glGenTextures(1, &normalTex);
-            glBindTexture(GL_TEXTURE_2D, normalTex);
+            glGenTextures(1, &normal_t);
+            glBindTexture(GL_TEXTURE_2D, normal_t);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_FLOAT,
                          nullptr);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normalTex,
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normal_t,
                                    0);
 
             // depth
-            glGenTextures(1, &depthTex);
-            glBindTexture(GL_TEXTURE_2D, depthTex);
+            glGenTextures(1, &depth_t);
+            glBindTexture(GL_TEXTURE_2D, depth_t);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, SCREEN_W, SCREEN_H, 0,
                          GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -59,7 +62,7 @@ void Session::init() {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTex, 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_t, 0);
 
             GLuint attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
             glDrawBuffers(2, attachments);
@@ -83,7 +86,7 @@ void Session::init() {
 
             se.mesh.gl_uniforms(s.ID);
 
-            glBindFramebuffer(GL_FRAMEBUFFER, gBufferFBO);
+            glBindFramebuffer(GL_FRAMEBUFFER, buffer);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glDrawElements(GL_TRIANGLES, se.mesh.indices.size(), GL_UNSIGNED_SHORT, 0);
@@ -107,11 +110,11 @@ void Session::init() {
         },
         [](Shader &s, Session &) {
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, depthTex);
+            glBindTexture(GL_TEXTURE_2D, depth_t);
             glUniform1i(uloc("depth_t"), 0);
 
             glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, normalTex);
+            glBindTexture(GL_TEXTURE_2D, normal_t);
             glUniform1i(uloc("normal_t"), 1);
 
             glUniform2f(uloc("texel_size"), 1.0f / SCREEN_W, 1.0f / SCREEN_H);
@@ -123,7 +126,7 @@ void Session::init() {
     geo.init();
     result.init();
 
-    log_info("Started in %s", time_to_string(timer.stop()).c_str());
+    log_info("Started in %s (total)", time_to_string(timer.stop()).c_str());
 }
 
 void Session::update() {

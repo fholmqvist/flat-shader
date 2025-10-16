@@ -2,6 +2,7 @@
 
 #include "base.hpp"
 #include "pch.hpp"
+#include "random.hpp"
 
 MeshStatic MeshStatic::from_scene(std::string file, u32 _diffuse_id, u32 _spectral_id,
                                   u32 _normal_map_id) {
@@ -84,6 +85,21 @@ MeshStatic MeshStatic::from_scene(std::string file, u32 _diffuse_id, u32 _spectr
     assert(m.indices.size() > 0);
 
     return m;
+}
+
+void MeshStatic::apply_perlin(vec3 wpos, vec3 strength) {
+    const float zoom = 1.4;
+
+    for (auto &v : verts) {
+        auto p = Random::perlin2(wpos.x + (v.pos.x * zoom), wpos.y + (v.pos.z * zoom));
+
+        v.pos.x += (p / 8) * strength.x;
+        v.pos.z += (p / 8) * strength.z;
+
+        if (v.pos.y > 0.01f) {
+            v.pos.y += (p / 16) * strength.y;
+        }
+    }
 }
 
 void MeshStatic::gl_buffer_data() {

@@ -21,6 +21,7 @@ void Camera::update() {
     }
 
     rot += vec2(mrotv.x, mrotv.y);
+    rot.y = std::clamp(rot.y, -88.0f, 88.0f);
 
     mrotv *= damping;
 
