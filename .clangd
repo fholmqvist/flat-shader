@@ -1,0 +1,12 @@
+CompileFlags:
+  Add: [
+    -Wall,
+    -Wextra,
+    -Wno-unused-function,
+    -Wno-unused-variable
+  ]
+
+InlayHints:
+  Enabled: No
+  ParameterNames: No
+  DeducedTypes: No
