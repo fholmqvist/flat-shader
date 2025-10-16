@@ -86,12 +86,18 @@ Session::Session() {
             glUniformMatrix4fv(uloc("view"), 1, GL_FALSE, value_ptr(se.camera.view_matrix()));
             glUniformMatrix4fv(uloc("projection"), 1, GL_FALSE, value_ptr(se.camera.perspective()));
 
-            se.mesh.gl_uniforms(s.ID);
-
             glBindFramebuffer(GL_FRAMEBUFFER, buffer);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            glDrawElements(GL_TRIANGLES, se.mesh.indices.size(), GL_UNSIGNED_SHORT, 0);
+            const int n = 1;
+
+            for (int y = 0; y < n; y++) {
+                for (int x = 0; x < n; x++) {
+                    se.mesh.world_pos = { x, 0, y * 1.45 };
+                    se.mesh.gl_uniforms(s.ID);
+                    glDrawElements(GL_TRIANGLES, se.mesh.indices.size(), GL_UNSIGNED_SHORT, 0);
+                }
+            }
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         });
@@ -110,7 +116,7 @@ Session::Session() {
 
             glBufferData(GL_ARRAY_BUFFER, sizeof(quad_verts), quad_verts, GL_STATIC_DRAW);
         },
-        [](Shader &s, Session &) {
+        [](Shader &s, Session &se) {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, depth_t);
             glUniform1i(uloc("depth_t"), 0);
@@ -122,6 +128,9 @@ Session::Session() {
             glUniform2f(uloc("texel_size"), 1.0f / SCREEN_W, 1.0f / SCREEN_H);
 
             glUniform2f(uloc("resolution"), SCREEN_W, SCREEN_H);
+
+            glUniformMatrix4fv(uloc("inv_proj"), 1, GL_FALSE,
+                               value_ptr(inverse(se.camera.perspective())));
 
             glDrawArrays(GL_TRIANGLES, 0, 6);
         });

@@ -79,5 +79,5 @@ mat4 Camera::view_matrix() {
 }
 
 mat4 Camera::perspective() {
-    return glm::perspective(radians(FOV), (float)SCREEN_W / (float)SCREEN_H, 0.1f, 16.0f);
+    return glm::perspective(radians(FOV), (float)SCREEN_W / (float)SCREEN_H, 0.1f, 64.0f);
 }
