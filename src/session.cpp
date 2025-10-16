@@ -21,8 +21,10 @@ void Session::init() {
 
     store_glsl_helper("assets/model.glsl");
 
-    camera.pos = { 2, 2, 2.5 };
-    camera.rot = { -130, -30 };
+    // camera.pos = { 1.4, 1, 1.2 };
+    camera.pos = { 0.4, 0.15, 0.8 };
+    // camera.rot = { -140, -25 };
+    camera.rot = { -120, -6.5 };
 
     mesh = MeshStatic::from_scene("assets/room.obj", 0, 0, 0);
     mesh.apply_perlin({ 0, 0, 0 }, vec3(0.2));
