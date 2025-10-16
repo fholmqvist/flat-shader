@@ -22,7 +22,7 @@ MeshStatic MeshStatic::from_scene(std::string file, u32 _diffuse_id, u32 _spectr
     }
 
     aiNode* node = scene->mRootNode;
-    while (node->mNumMeshes == 0) {
+    if (node->mNumMeshes == 0) {
         for (size i = 0; i < node->mNumChildren; i++) {
             aiNode* child = node->mChildren[i];
             if (child->mNumMeshes == 0) {
@@ -32,7 +32,7 @@ MeshStatic MeshStatic::from_scene(std::string file, u32 _diffuse_id, u32 _spectr
         }
     }
 
-    if (!node) {
+    if (!node || node->mNumMeshes == 0) {
         log_dang("%s: no meshes found", file.c_str());
     }
 
