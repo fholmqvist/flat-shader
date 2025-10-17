@@ -17,7 +17,8 @@ struct Session {
     Input input;
     Camera camera;
 
-    MeshStatic mesh;
+    MeshStatic sofa;
+    MeshStatic chair;
 
     Shader geo;
     Shader result;

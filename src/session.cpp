@@ -30,9 +30,8 @@ Session::Session() {
     camera.pos = { 2.5, 1.5, 2.5 };
     camera.rot = { -135, -32 };
 
-    // mesh = MeshStatic::from_scene("assets/room.obj", 0, 0, 0);
-    mesh = MeshStatic::from_scene("assets/sofa.obj", 0, 0, 0);
-    mesh.apply_perlin({ 0, 0, 0 }, vec3(0.2));
+    sofa = MeshStatic::from_scene("assets/sofa.obj", 0, 0, 0);
+    chair = MeshStatic::from_scene("assets/chair.obj", 0, 0, 0);
 
     std::string path = "assets/antiquity16.png";
 
@@ -114,8 +113,6 @@ Session::Session() {
             glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                                   (void*)(offsetof(Vertex, uv)));
             glEnableVertexAttribArray(3);
-
-            mesh.gl_buffer_data();
         },
         [](Shader &s, Session &se) {
             glUniformMatrix4fv(uloc("view_projection"), 1, GL_FALSE,
@@ -128,17 +125,36 @@ Session::Session() {
             glBindTexture(GL_TEXTURE_2D, sector_t);
             glUniform1i(uloc("sector_t"), 0);
 
-            int n = 4;
+            se.sofa.gl_buffer_data();
 
             glUniform3f(uloc("color"), 0.99, 0.67, 0.12);
 
-            for (int y = 0; y < n; y++) {
-                for (int x = 0; x < n; x++) {
-                    se.mesh.world_pos = { (float)x / 2, 0, (float)y / 2 };
-                    se.mesh.rotation.y += DELTA_TIME / 32;
-                    se.mesh.gl_uniforms(s.ID);
-                    glDrawElements(GL_TRIANGLES, se.mesh.indices.size(), GL_UNSIGNED_SHORT, 0);
-                }
+            std::vector<vec3> positions = {
+                { 0, 0, 0 }, { 0, 0, 1 }, { 0.5, 0, 0.5 }, { 0.5, 0, 1.5 },
+                { 1, 0, 0 }, { 1, 0, 1 }, { 1.5, 0, 0.5 }, { 1.5, 0, 1.5 },
+            };
+            se.sofa.rotation.y += DELTA_TIME / 4;
+
+            for (auto &pos : positions) {
+                se.sofa.world_pos = pos;
+                se.sofa.gl_uniforms(s.ID);
+                glDrawElements(GL_TRIANGLES, se.sofa.indices.size(), GL_UNSIGNED_SHORT, 0);
+            }
+
+            se.chair.gl_buffer_data();
+
+            glUniform3f(uloc("color"), 0.99, 0.67, 0.12);
+
+            positions = {
+                { 0, 0, 0.5 }, { 0, 0, 1.5 }, { 0.5, 0, 0 }, { 0.5, 0, 1 },
+                { 1, 0, 0.5 }, { 1, 0, 1.5 }, { 1.5, 0, 0 }, { 1.5, 0, 1 },
+            };
+            se.chair.rotation.y -= DELTA_TIME / 4;
+
+            for (auto &pos : positions) {
+                se.chair.world_pos = pos;
+                se.chair.gl_uniforms(s.ID);
+                glDrawElements(GL_TRIANGLES, se.chair.indices.size(), GL_UNSIGNED_SHORT, 0);
             }
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
