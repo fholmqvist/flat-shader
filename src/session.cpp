@@ -10,7 +10,8 @@
 #include "external/stb_image.h"
 
 GLuint buffer;
-GLuint color_t;
+GLuint buffer_sector;
+GLuint buffer_texture;
 // GLuint normal_t;
 // GLuint depth_t;
 
@@ -60,13 +61,23 @@ Session::Session() {
             glGenFramebuffers(1, &buffer);
             glBindFramebuffer(GL_FRAMEBUFFER, buffer);
 
-            glGenTextures(1, &color_t);
-            glBindTexture(GL_TEXTURE_2D, color_t);
+            glGenTextures(1, &buffer_sector);
+            glBindTexture(GL_TEXTURE_2D, buffer_sector);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_FLOAT,
                          nullptr);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_t, 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                                   buffer_sector, 0);
+
+            glGenTextures(1, &buffer_texture);
+            glBindTexture(GL_TEXTURE_2D, buffer_texture);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_FLOAT,
+                         nullptr);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D,
+                                   buffer_texture, 0);
 
             GLuint depth_rbo;
             glGenRenderbuffers(1, &depth_rbo);
@@ -74,6 +85,13 @@ Session::Session() {
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, SCREEN_W, SCREEN_H);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
                                       depth_rbo);
+
+            GLenum attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+            glDrawBuffers(2, attachments);
+
+            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+                log_dang("Framebuffer not complete");
+            }
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -99,6 +117,8 @@ Session::Session() {
             glUniform1i(uloc("sector_t"), 0);
 
             int n = 4;
+
+            glUniform3f(uloc("color"), 0.99, 0.67, 0.12);
 
             for (int y = 0; y < n; y++) {
                 for (int x = 0; x < n; x++) {
@@ -127,8 +147,12 @@ Session::Session() {
         },
         [](Shader &s, Session &) {
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, color_t);
-            glUniform1i(uloc("t"), 0);
+            glBindTexture(GL_TEXTURE_2D, buffer_sector);
+            glUniform1i(uloc("sector_t"), 0);
+
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, buffer_texture);
+            glUniform1i(uloc("texture_t"), 1);
 
             glUniform2f(uloc("texel_size"), 1.0f / SCREEN_W, 1.0f / SCREEN_H);
 
