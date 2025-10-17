@@ -26,5 +26,6 @@ void main() {
     vec3 view_dir = normalize(view_pos - _frag_pos);
     vec3 result = dir_light_calc(dir_light, N, view_dir, color);
 
-    texture_out = result.r > 0.25 ? color : mix(color, BLACK, 0.95);
+    float avg = (result.r + result.g + result.b) / 3;
+    texture_out = avg > 0.25 ? color : mix(color, BLACK, 0.9);
 }

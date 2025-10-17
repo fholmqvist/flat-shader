@@ -20,6 +20,7 @@ struct Session {
     MeshStatic sofa;
     MeshStatic chair;
     MeshStatic table;
+    MeshStatic wall;
 
     Shader geo;
     Shader result;

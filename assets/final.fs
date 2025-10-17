@@ -44,14 +44,16 @@ void main() {
         samples++;
     }
 
-    edge = clamp(edge / float(samples), 0.0, 1.0);
+    edge = clamp(edge / float(samples), 0, 1);
 
     edge = edge > 0.2 ? 1 : 0;
 
     vec3 final = texture(texture_t, _uv).rgb;
 
-    if (final.r < 0.1) {
-        FragColor = vec4(mix(BLACK, final*18, edge), 1);
+    float avg = (final.r + final.g + final.b) / 3;
+
+    if (avg < 0.1) {
+        FragColor = vec4(mix(BLACK, final * 8, edge), 1);
     } else {
         FragColor = vec4(mix(final, BLACK, edge), 1);
     }
