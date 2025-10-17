@@ -3,6 +3,7 @@
 #include "base.hpp"
 #include "pch.hpp"
 #include "random.hpp"
+#include <SDL3/SDL_stdinc.h>
 
 MeshStatic MeshStatic::from_scene(std::string file, u32 _diffuse_id, u32 _spectral_id,
                                   u32 _normal_map_id) {
@@ -117,6 +118,8 @@ void MeshStatic::gl_uniforms(u32 &shader_id) {
                 world_pos.z);
     glUniform3f(glGetUniformLocation(shader_id, "rotation"), rotation.x, rotation.y, rotation.z);
     glUniform1f(glGetUniformLocation(shader_id, "scale"), scale);
+
+    glUniform1f(glGetUniformLocation(shader_id, "rand"), world_pos.x);
 }
 
 void MeshStatic::print_verts() {
