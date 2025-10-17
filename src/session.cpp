@@ -162,10 +162,12 @@ Session::Session() {
 
             glUniform3f(uloc("color"), 0.99, 0.67, 0.12);
 
-            for (int y = -1; y < 4; y++) {
-                for (int x = -1; x < 4; x++) {
-                    if (x == -1 || x == 3 || y == -1 || y == 3) {
-                        se.table.world_pos = { x, 0, y };
+            int min = 0;
+            int max = 6;
+            for (int y = min; y < max; y++) {
+                for (int x = min; x < max; x++) {
+                    if (x == min || x == max - 1 || y == min || y == max - 1) {
+                        se.table.world_pos = { ((float)x / 2) - 0.5, 0, ((float)y / 2) - 0.5 };
                         se.table.gl_uniforms(s.ID);
                         glDrawElements(GL_TRIANGLES, se.table.indices.size(), GL_UNSIGNED_SHORT, 0);
                     }
