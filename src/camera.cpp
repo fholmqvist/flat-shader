@@ -13,7 +13,7 @@ const float DEFAULT_PITCH = -90;
 
 void Camera::update() {
     pos += vel * DELTA_TIME;
-    const float damping = powf(0.9, DELTA_TIME * MOVE_SPEED);
+    const float damping = powf(0.9, DELTA_TIME * 60.0f);
     vel *= damping;
 
     if (length(vel) < 0.001f) {

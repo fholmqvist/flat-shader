@@ -21,7 +21,7 @@ struct Camera {
     vec3 w_up = vec3(0, 1, 0);
 
     const float FOV = 45.0f;
-    const float MOVE_SPEED = 60.0f;
+    const float MOVE_SPEED = 8.0f; // 60.0f;
 
     vec2 mpos;
     vec2 mrotv = vec2(0);

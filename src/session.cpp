@@ -26,9 +26,11 @@ Session::Session() {
     }
 
     store_glsl_helper("assets/model.glsl");
+    store_glsl_helper("assets/lights.glsl");
+    store_glsl_helper("assets/lights_calc.glsl");
 
-    camera.pos = { 2.5, 1.5, 2.5 };
-    camera.rot = { -135, -32 };
+    camera.pos = { 0.4, 0.3, 0.6 };
+    camera.rot = { -125, -15 };
 
     sofa = MeshStatic::from_scene("assets/sofa.obj", 0, 0, 0);
     chair = MeshStatic::from_scene("assets/chair.obj", 0, 0, 0);
@@ -116,68 +118,43 @@ Session::Session() {
             glEnableVertexAttribArray(3);
         },
         [](Shader &s, Session &se) {
-            glUniformMatrix4fv(uloc("view_projection"), 1, GL_FALSE,
-                               value_ptr(se.camera.perspective() * se.camera.view_matrix()));
-
             glBindFramebuffer(GL_FRAMEBUFFER, buffer);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            glUniformMatrix4fv(uloc("view_projection"), 1, GL_FALSE,
+                               value_ptr(se.camera.perspective() * se.camera.view_matrix()));
+            glUniform3f(uloc("view_pos"), se.camera.pos.x, se.camera.pos.y, se.camera.pos.z);
 
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, sector_t);
             glUniform1i(uloc("sector_t"), 0);
 
+            glUniform1f(uloc("dir_light.intensity"), 1);
+            glUniform3f(uloc("dir_light.color"), 1, 0, 0);
+            glUniform3f(uloc("dir_light.dir"), 0, 0, -1);
+
             se.sofa.gl_buffer_data();
-
             glUniform3f(uloc("color"), 0.99, 0.67, 0.12);
-
-            std::vector<vec3> positions = {
-                { 0, 0, 0 }, { 0, 0, 1 }, { 0.5, 0, 0.5 }, { 0.5, 0, 1.5 },
-                { 1, 0, 0 }, { 1, 0, 1 }, { 1.5, 0, 0.5 }, { 1.5, 0, 1.5 },
-            };
-            se.sofa.rotation.y += DELTA_TIME / 4;
-
-            for (auto &pos : positions) {
-                se.sofa.world_pos = pos;
-                se.sofa.gl_uniforms(s.ID);
-                glDrawElements(GL_TRIANGLES, se.sofa.indices.size(), GL_UNSIGNED_SHORT, 0);
-            }
-
-            se.chair.gl_buffer_data();
-
-            glUniform3f(uloc("color"), 0.12, 0.67, 0.99);
-
-            positions = {
-                { 0, 0, 0.5 }, { 0, 0, 1.5 }, { 0.5, 0, 0 }, { 0.5, 0, 1 },
-                { 1, 0, 0.5 }, { 1, 0, 1.5 }, { 1.5, 0, 0 }, { 1.5, 0, 1 },
-            };
-            se.chair.rotation.y -= DELTA_TIME / 4;
-
-            for (auto &pos : positions) {
-                se.chair.world_pos = pos;
-                se.chair.gl_uniforms(s.ID);
-                glDrawElements(GL_TRIANGLES, se.chair.indices.size(), GL_UNSIGNED_SHORT, 0);
-            }
+            se.sofa.world_pos = vec3(-0.2, 0, 0);
+            se.sofa.gl_uniforms(s.ID);
+            glDrawElements(GL_TRIANGLES, se.sofa.indices.size(), GL_UNSIGNED_SHORT, 0);
 
             se.table.gl_buffer_data();
-
             glUniform3f(uloc("color"), 0.67, 0.12, 0.99);
+            se.table.gl_uniforms(s.ID);
+            glDrawElements(GL_TRIANGLES, se.table.indices.size(), GL_UNSIGNED_SHORT, 0);
 
-            int min = 0;
-            int max = 6;
-            for (int y = min; y < max; y++) {
-                for (int x = min; x < max; x++) {
-                    if (x == min || x == max - 1 || y == min || y == max - 1) {
-                        se.table.world_pos = { ((float)x / 2) - 0.5, 0, ((float)y / 2) - 0.5 };
-                        se.table.gl_uniforms(s.ID);
-                        glDrawElements(GL_TRIANGLES, se.table.indices.size(), GL_UNSIGNED_SHORT, 0);
-                    }
-                }
-            }
+            se.chair.gl_buffer_data();
+            glUniform3f(uloc("color"), 0.12, 0.67, 0.99);
+            se.chair.world_pos = vec3(0.2, 0, 0);
+            se.chair.rotation.y = DEG2RAD(180);
+            se.chair.gl_uniforms(s.ID);
+            glDrawElements(GL_TRIANGLES, se.chair.indices.size(), GL_UNSIGNED_SHORT, 0);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         });
     result = Shader(
-        "assets/sector_flat.vs", "assets/sector_flat.fs",
+        "assets/final.vs", "assets/final.fs",
         [](Shader &) {
             glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
             glEnableVertexAttribArray(0);

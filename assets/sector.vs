@@ -14,11 +14,13 @@ uniform mat4 view_projection;
 
 out vec3 _normal;
 out vec2 _uv;
+out vec3 _frag_pos;
 
 void main() {
     mat4 model = model_matrix(world_pos, rotation, scale);
     gl_Position = view_projection * model * vec4(pos, 1);
 
     _normal = mat3(transpose(inverse(model))) * normal;
+    _frag_pos = vec3(model * vec4(pos, 1));
     _uv = uv;
 }
