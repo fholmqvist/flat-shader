@@ -12,10 +12,6 @@ uniform vec3 color;
 uniform vec3 view_pos;
 uniform float rand;
 
-const vec3  tintDirection = vec3(0, 0, 1);
-const vec3  tint          = vec3(0.8, 0, 0);
-const float tintStrength  = 0.5;
-
 const vec3 BLACK = vec3(0);
 
 #include "lights.glsl"
@@ -31,14 +27,4 @@ void main() {
     vec3 result = dir_light_calc(dir_light, N, view_dir, color);
 
     texture_out = result.r > 0.25 ? color : mix(color, BLACK, 0.95);
-    // texture_out = sector_rgb;
-
-    // vec3 L = normalize(tintDirection);
-
-    // float facing = dot(N, L);
-    // float tintAmount = smoothstep(0, 1, facing) * tintStrength;
-
-    // vec3 final = mix(color, tint, tintAmount);
-
-    // texture_out = vec3(final);
 }

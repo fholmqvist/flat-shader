@@ -48,10 +48,11 @@ void main() {
 
     edge = edge > 0.2 ? 1 : 0;
 
-    vec3 color = texture(texture_t, _uv).rgb;
+    vec3 final = texture(texture_t, _uv).rgb;
 
-    FragColor = vec4(mix(color, BLACK, edge), 1);
-
-    // Debug depth scaling:
-    // FragColor = vec4(vec3(scale), 1);
+    if (final.r < 0.1) {
+        FragColor = vec4(mix(BLACK, final*18, edge), 1);
+    } else {
+        FragColor = vec4(mix(final, BLACK, edge), 1);
+    }
 }
