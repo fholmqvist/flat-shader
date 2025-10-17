@@ -4,15 +4,34 @@ in vec2 _uv;
 
 uniform sampler2D sector_t;
 uniform sampler2D texture_t;
+uniform sampler2D depth_t;
 
 uniform vec2 texel_size;
 
 out vec4 FragColor;
 
 float threshold = 0.05;
-int radius = 2;
+const int base_radius = 2;
+
+const vec3 BLACK = vec3(0);
+
+const float near = 0.2;
+const float far  = 1;
+
+float linearize_depth(float depth) {
+    float z = depth * 2 - 1;
+    return (2 * near * far) / (far + near - z * (far - near));
+}
 
 void main() {
+    float depth = texture(depth_t, _uv).r;
+    float linear_depth = linearize_depth(depth);
+
+    float scale = (1 - linear_depth) * 8;
+
+    int radius = int(float(base_radius) * scale);
+    radius = clamp(radius, 1, 10);
+
     vec3 center = texture(sector_t, _uv).rgb;
     float edge = 0.0;
     int samples = 0;
@@ -29,7 +48,10 @@ void main() {
 
     edge = edge > 0.2 ? 1 : 0;
 
-    FragColor = vec4(vec3(edge), 1.0);
+    vec3 color = texture(texture_t, _uv).rgb;
 
-    FragColor = vec4(mix(texture(texture_t, _uv).rgb, vec3(0), edge), 1);
+    FragColor = vec4(mix(color, BLACK, edge), 1);
+
+    // Debug depth scaling:
+    // FragColor = vec4(vec3(scale), 1);
 }
