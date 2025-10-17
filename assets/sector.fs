@@ -3,6 +3,7 @@
 in vec2 _uv;
 in vec3 _normal;
 in vec3 _frag_pos;
+in vec3 _sector_color;
 
 layout (location = 0) out vec3 sector_out;
 layout (location = 1) out vec3 texture_out;
@@ -20,8 +21,9 @@ const vec3 BLACK = vec3(0);
 void main() {
     vec3 N = normalize(_normal);
 
-    vec3 sector_rgb = texture(sector_t, _uv).rgb + vec3(rand, rand / 2, rand / 3);
-    sector_out = sector_rgb;
+    sector_out = _sector_color;
+    texture_out = _sector_color;
+    return;
 
     vec3 view_dir = normalize(view_pos - _frag_pos);
     vec3 result = dir_light_calc(dir_light, N, view_dir, color);

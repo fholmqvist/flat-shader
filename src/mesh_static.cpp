@@ -5,6 +5,10 @@
 #include "random.hpp"
 #include <SDL3/SDL_stdinc.h>
 
+static std::random_device rd;
+static std::mt19937 gen(rd());
+static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+
 MeshStatic MeshStatic::from_scene(std::string file, u32 _diffuse_id, u32 _spectral_id,
                                   u32 _normal_map_id) {
     Assimp::Importer import;
@@ -44,13 +48,13 @@ MeshStatic MeshStatic::from_scene(std::string file, u32 _diffuse_id, u32 _spectr
 
     aiMesh* mesh = scene->mMeshes[node->mMeshes[0]];
 
-    float face_offset = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+    vec3 sector_color = vec3(dist(gen), dist(gen), dist(gen));
 
     for (size i = 0; i < mesh->mNumFaces; i++) {
         auto &face = mesh->mFaces[i];
 
         if (i % 2 == 0) {
-            face_offset = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+            sector_color = vec3(dist(gen), dist(gen), dist(gen));
         }
 
         for (size j = 0; j < face.mNumIndices; j++) {
@@ -62,20 +66,17 @@ MeshStatic MeshStatic::from_scene(std::string file, u32 _diffuse_id, u32 _spectr
 
             if (mesh->mNormals) {
                 v.normal = { mesh->mNormals[idx].x, mesh->mNormals[idx].y, mesh->mNormals[idx].z };
-            }
-
-            if (mesh->mTangents) {
-                v.tangent = { mesh->mTangents[idx].x, mesh->mTangents[idx].y,
-                              mesh->mTangents[idx].z };
+            } else {
+                log_dang("%s is missing normals", file.c_str());
             }
 
             if (mesh->mTextureCoords[0]) {
                 v.uv = { mesh->mTextureCoords[0][idx].x, mesh->mTextureCoords[0][idx].y };
             } else {
-                v.uv = {};
+                log_dang("%s is missing uvs", file.c_str());
             }
 
-            v.face_offset = face_offset;
+            v.sector_color = sector_color;
 
             m.indices.push_back((u16)m.verts.size());
             m.verts.push_back(v);

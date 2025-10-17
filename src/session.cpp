@@ -12,7 +12,6 @@
 GLuint buffer;
 GLuint buffer_sector;
 GLuint buffer_texture;
-// GLuint buffer_normal;
 GLuint buffer_depth;
 
 u32 sector_t = 0;
@@ -33,6 +32,7 @@ Session::Session() {
     camera.rot = { -125, -15 };
 
     sofa = MeshStatic::from_scene("assets/sofa.obj", 0, 0, 0);
+    exit(0);
     chair = MeshStatic::from_scene("assets/chair.obj", 0, 0, 0);
     table = MeshStatic::from_scene("assets/table.obj", 0, 0, 0);
     wall = MeshStatic::from_scene("assets/wall.obj", 0, 0, 0);
@@ -114,8 +114,12 @@ Session::Session() {
                                   (void*)(offsetof(Vertex, normal)));
             glEnableVertexAttribArray(1);
 
-            glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                                   (void*)(offsetof(Vertex, uv)));
+            glEnableVertexAttribArray(2);
+
+            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                                  (void*)(offsetof(Vertex, sector_color)));
             glEnableVertexAttribArray(3);
         },
         [](Shader &s, Session &se) {

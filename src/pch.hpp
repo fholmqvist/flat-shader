@@ -42,6 +42,7 @@ using namespace glm;
 #include <numeric>        // IWYU pragma: keep
 #include <optional>       // IWYU pragma: keep
 #include <queue>          // IWYU pragma: keep
+#include <random>         // IWYU pragma: keep
 #include <set>            // IWYU pragma: keep
 #include <sstream>        // IWYU pragma: keep
 #include <stack>          // IWYU pragma: keep

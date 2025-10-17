@@ -3,9 +3,8 @@
 struct Vertex {
     vec3 pos;
     vec3 normal;
-    vec3 tangent;
     vec2 uv;
-    float face_offset;
+    vec3 sector_color;
 
     void print(int index);
 };
