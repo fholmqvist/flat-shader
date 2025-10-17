@@ -107,6 +107,10 @@ Session::Session() {
                                   (void*)(offsetof(Vertex, pos)));
             glEnableVertexAttribArray(0);
 
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                                  (void*)(offsetof(Vertex, normal)));
+            glEnableVertexAttribArray(1);
+
             glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                                   (void*)(offsetof(Vertex, uv)));
             glEnableVertexAttribArray(3);
@@ -131,6 +135,7 @@ Session::Session() {
             for (int y = 0; y < n; y++) {
                 for (int x = 0; x < n; x++) {
                     se.mesh.world_pos = { (float)x / 2, 0, (float)y / 2 };
+                    se.mesh.rotation.y += DELTA_TIME / 32;
                     se.mesh.gl_uniforms(s.ID);
                     glDrawElements(GL_TRIANGLES, se.mesh.indices.size(), GL_UNSIGNED_SHORT, 0);
                 }
