@@ -32,6 +32,7 @@ Session::Session() {
 
     sofa = MeshStatic::from_scene("assets/sofa.obj", 0, 0, 0);
     chair = MeshStatic::from_scene("assets/chair.obj", 0, 0, 0);
+    table = MeshStatic::from_scene("assets/table.obj", 0, 0, 0);
 
     std::string path = "assets/antiquity16.png";
 
@@ -56,7 +57,7 @@ Session::Session() {
 
     geo = Shader(
         "assets/sector.vs", "assets/sector.fs",
-        [this](Shader &) {
+        [](Shader &) {
             glGenFramebuffers(1, &buffer);
             glBindFramebuffer(GL_FRAMEBUFFER, buffer);
 
@@ -155,6 +156,20 @@ Session::Session() {
                 se.chair.world_pos = pos;
                 se.chair.gl_uniforms(s.ID);
                 glDrawElements(GL_TRIANGLES, se.chair.indices.size(), GL_UNSIGNED_SHORT, 0);
+            }
+
+            se.table.gl_buffer_data();
+
+            glUniform3f(uloc("color"), 0.99, 0.67, 0.12);
+
+            for (int y = -1; y < 4; y++) {
+                for (int x = -1; x < 4; x++) {
+                    if (x == -1 || x == 3 || y == -1 || y == 3) {
+                        se.table.world_pos = { x, 0, y };
+                        se.table.gl_uniforms(s.ID);
+                        glDrawElements(GL_TRIANGLES, se.table.indices.size(), GL_UNSIGNED_SHORT, 0);
+                    }
+                }
             }
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
