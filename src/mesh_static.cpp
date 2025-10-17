@@ -46,40 +46,42 @@ MeshStatic MeshStatic::from_scene(std::string file, u32 _diffuse_id, u32 _spectr
     m.specular_id = _spectral_id;
     m.normal_map_id = _normal_map_id;
 
-    aiMesh* mesh = scene->mMeshes[node->mMeshes[0]];
+    for (usize midx = 0; midx < scene->mNumMeshes; midx++) {
+        aiMesh* mesh = scene->mMeshes[midx];
 
-    vec3 sector_color = vec3(dist(gen), dist(gen), dist(gen));
+        // TODO: Write Blender python script that splits mesh based on seams and groups them.
+        log_info("%s", mesh->mName.C_Str());
 
-    for (size i = 0; i < mesh->mNumFaces; i++) {
-        auto &face = mesh->mFaces[i];
+        vec3 sector_color = vec3(dist(gen), dist(gen), dist(gen));
 
-        if (i % 2 == 0) {
-            sector_color = vec3(dist(gen), dist(gen), dist(gen));
-        }
+        for (size i = 0; i < mesh->mNumFaces; i++) {
+            auto &face = mesh->mFaces[i];
 
-        for (size j = 0; j < face.mNumIndices; j++) {
-            u32 idx = face.mIndices[j];
+            for (size j = 0; j < face.mNumIndices; j++) {
+                u32 idx = face.mIndices[j];
 
-            Vertex v = {};
+                Vertex v = {};
 
-            v.pos = { mesh->mVertices[idx].x, mesh->mVertices[idx].y, mesh->mVertices[idx].z };
+                v.pos = { mesh->mVertices[idx].x, mesh->mVertices[idx].y, mesh->mVertices[idx].z };
 
-            if (mesh->mNormals) {
-                v.normal = { mesh->mNormals[idx].x, mesh->mNormals[idx].y, mesh->mNormals[idx].z };
-            } else {
-                log_dang("%s is missing normals", file.c_str());
+                if (mesh->mNormals) {
+                    v.normal = { mesh->mNormals[idx].x, mesh->mNormals[idx].y,
+                                 mesh->mNormals[idx].z };
+                } else {
+                    log_dang("%s is missing normals", file.c_str());
+                }
+
+                if (mesh->mTextureCoords[0]) {
+                    v.uv = { mesh->mTextureCoords[0][idx].x, mesh->mTextureCoords[0][idx].y };
+                } else {
+                    log_dang("%s is missing uvs", file.c_str());
+                }
+
+                v.sector_color = sector_color;
+
+                m.indices.push_back((u16)m.verts.size());
+                m.verts.push_back(v);
             }
-
-            if (mesh->mTextureCoords[0]) {
-                v.uv = { mesh->mTextureCoords[0][idx].x, mesh->mTextureCoords[0][idx].y };
-            } else {
-                log_dang("%s is missing uvs", file.c_str());
-            }
-
-            v.sector_color = sector_color;
-
-            m.indices.push_back((u16)m.verts.size());
-            m.verts.push_back(v);
         }
     }
 
