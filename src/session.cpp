@@ -144,7 +144,7 @@ Session::Session() {
 
             se.chair.gl_buffer_data();
 
-            glUniform3f(uloc("color"), 0.99, 0.67, 0.12);
+            glUniform3f(uloc("color"), 0.12, 0.67, 0.99);
 
             positions = {
                 { 0, 0, 0.5 }, { 0, 0, 1.5 }, { 0.5, 0, 0 }, { 0.5, 0, 1 },
@@ -160,7 +160,7 @@ Session::Session() {
 
             se.table.gl_buffer_data();
 
-            glUniform3f(uloc("color"), 0.99, 0.67, 0.12);
+            glUniform3f(uloc("color"), 0.67, 0.12, 0.99);
 
             int min = 0;
             int max = 6;
