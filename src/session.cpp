@@ -32,7 +32,6 @@ Session::Session() {
     camera.rot = { -125, -15 };
 
     sofa = MeshStatic::from_scene("assets/sofa.obj", 0, 0, 0);
-    exit(0);
     chair = MeshStatic::from_scene("assets/chair.obj", 0, 0, 0);
     table = MeshStatic::from_scene("assets/table.obj", 0, 0, 0);
     wall = MeshStatic::from_scene("assets/wall.obj", 0, 0, 0);
