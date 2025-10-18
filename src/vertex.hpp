@@ -5,6 +5,4 @@ struct Vertex {
     vec3 normal;
     vec2 uv;
     vec3 sector_color;
-
-    void print(int index);
 };

@@ -28,13 +28,12 @@ Session::Session() {
     store_glsl_helper("assets/lights.glsl");
     store_glsl_helper("assets/lights_calc.glsl");
 
-    camera.pos = { 0.4, 0.3, 0.6 };
-    camera.rot = { -125, -15 };
+    camera.pos = { 0.7, 1.1, 1.2 };
+    camera.rot = { -120, -30 };
 
     sofa = MeshStatic::from_scene("assets/sofa.obj", 0, 0, 0);
     chair = MeshStatic::from_scene("assets/chair.obj", 0, 0, 0);
     table = MeshStatic::from_scene("assets/table.obj", 0, 0, 0);
-    wall = MeshStatic::from_scene("assets/wall.obj", 0, 0, 0);
 
     std::string path = "assets/antiquity16.png";
 
@@ -136,29 +135,19 @@ Session::Session() {
             glUniform1f(uloc("dir_light.intensity"), 1);
             glUniform3f(uloc("dir_light.dir"), 0, -1, -1);
 
-            se.sofa.gl_buffer_data();
             glUniform3f(uloc("color"), 0.99, 0.67, 0.12);
-            se.sofa.world_pos = vec3(-0.2, 0, 0);
-            se.sofa.gl_uniforms(s.ID);
-            glDrawElements(GL_TRIANGLES, se.sofa.indices.size(), GL_UNSIGNED_SHORT, 0);
+            se.sofa.world_pos = vec3(-0.3, 0, 0);
+            se.sofa.rotation.y = DEG2RAD(0);
+            se.sofa.draw(s.ID);
+            se.sofa.world_pos = vec3(0.3, 0, 0);
+            se.sofa.rotation.y = DEG2RAD(180);
+            se.sofa.draw(s.ID);
 
-            se.table.gl_buffer_data();
-            glUniform3f(uloc("color"), 0.67, 0.12, 0.99);
-            se.table.gl_uniforms(s.ID);
-            glDrawElements(GL_TRIANGLES, se.table.indices.size(), GL_UNSIGNED_SHORT, 0);
+            se.table.draw(s.ID);
 
-            se.chair.gl_buffer_data();
-            glUniform3f(uloc("color"), 0.12, 0.67, 0.99);
-            se.chair.world_pos = vec3(0.2, 0, 0);
-            se.chair.rotation.y = DEG2RAD(180);
-            se.chair.gl_uniforms(s.ID);
-            glDrawElements(GL_TRIANGLES, se.chair.indices.size(), GL_UNSIGNED_SHORT, 0);
-
-            se.wall.gl_buffer_data();
-            glUniform3f(uloc("color"), 0.67, 0.99, 0.12);
-            se.wall.world_pos = vec3(0, 0, -0.25);
-            se.wall.gl_uniforms(s.ID);
-            glDrawElements(GL_TRIANGLES, se.wall.indices.size(), GL_UNSIGNED_SHORT, 0);
+            se.chair.world_pos = vec3(0, 0, -0.6);
+            se.chair.rotation.y = DEG2RAD(-90);
+            se.chair.draw(s.ID);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         });

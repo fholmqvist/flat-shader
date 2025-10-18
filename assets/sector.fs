@@ -22,8 +22,6 @@ void main() {
     vec3 N = normalize(_normal);
 
     sector_out = _sector_color;
-    texture_out = _sector_color;
-    return;
 
     vec3 view_dir = normalize(view_pos - _frag_pos);
     vec3 result = dir_light_calc(dir_light, N, view_dir, color);

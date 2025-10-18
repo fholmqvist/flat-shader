@@ -18,9 +18,10 @@ struct MeshStatic {
     static MeshStatic from_scene(std::string file, u32 _diffuse_id, u32 _spectral_id,
                                  u32 _normal_map_id);
 
+    void draw(u32 shader_id);
+
     void apply_perlin(vec3 wpos, vec3 strength = vec3(1));
 
     void gl_buffer_data();
-    void gl_uniforms(u32 &shader_id);
-    void print_verts();
+    void gl_uniforms(u32 shader_id);
 };

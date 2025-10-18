@@ -88,6 +88,12 @@ MeshStatic MeshStatic::from_scene(std::string file, u32 _diffuse_id, u32 _spectr
     return m;
 }
 
+void MeshStatic::draw(u32 shader_id) {
+    gl_buffer_data();
+    gl_uniforms(shader_id);
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, 0);
+}
+
 void MeshStatic::apply_perlin(vec3 wpos, vec3 strength) {
     const float zoom = 32;
 
@@ -113,17 +119,11 @@ void MeshStatic::gl_buffer_data() {
                  GL_STATIC_DRAW);
 }
 
-void MeshStatic::gl_uniforms(u32 &shader_id) {
+void MeshStatic::gl_uniforms(u32 shader_id) {
     glUniform3f(glGetUniformLocation(shader_id, "world_pos"), world_pos.x, world_pos.y,
                 world_pos.z);
     glUniform3f(glGetUniformLocation(shader_id, "rotation"), rotation.x, rotation.y, rotation.z);
     glUniform1f(glGetUniformLocation(shader_id, "scale"), scale);
 
     glUniform1f(glGetUniformLocation(shader_id, "rand"), world_pos.x);
-}
-
-void MeshStatic::print_verts() {
-    for (size i = 0; i < (size)verts.size(); i++) {
-        verts[i].print(i);
-    }
 }
