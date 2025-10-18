@@ -31,9 +31,9 @@ Session::Session() {
     camera.pos = { 0.7, 1.1, 1.2 };
     camera.rot = { -120, -30 };
 
-    sofa = MeshStatic::from_scene("assets/sofa.obj", 0, 0, 0);
-    chair = MeshStatic::from_scene("assets/chair.obj", 0, 0, 0);
-    table = MeshStatic::from_scene("assets/table.obj", 0, 0, 0);
+    sofa = MeshStatic::from_scene("assets/sofa.obj");
+    chair = MeshStatic::from_scene("assets/chair.obj");
+    table = MeshStatic::from_scene("assets/table.obj");
 
     std::string path = "assets/antiquity16.png";
 
@@ -136,16 +136,16 @@ Session::Session() {
             glUniform3f(uloc("dir_light.dir"), 0, -1, -1);
 
             glUniform3f(uloc("color"), 0.99, 0.67, 0.12);
-            se.sofa.world_pos = vec3(-0.3, 0, 0);
+            se.sofa.position = vec3(-0.3, 0, 0);
             se.sofa.rotation.y = DEG2RAD(0);
             se.sofa.draw(s.ID);
-            se.sofa.world_pos = vec3(0.3, 0, 0);
+            se.sofa.position = vec3(0.3, 0, 0);
             se.sofa.rotation.y = DEG2RAD(180);
             se.sofa.draw(s.ID);
 
             se.table.draw(s.ID);
 
-            se.chair.world_pos = vec3(0, 0, -0.6);
+            se.chair.position = vec3(0, 0, -0.6);
             se.chair.rotation.y = DEG2RAD(-90);
             se.chair.draw(s.ID);
 
