@@ -14,8 +14,6 @@ GLuint buffer_sector;
 GLuint buffer_texture;
 GLuint buffer_depth;
 
-u32 sector_t = 0;
-
 #define uloc(name) glGetUniformLocation(s.ID, name)
 
 Session::Session() {
@@ -34,27 +32,6 @@ Session::Session() {
     sofa = MeshStatic::from_scene("assets/sofa.obj");
     chair = MeshStatic::from_scene("assets/chair.obj");
     table = MeshStatic::from_scene("assets/table.obj");
-
-    std::string path = "assets/antiquity16.png";
-
-    int width, height, nr_channels;
-    auto texture_data = stbi_load(path.c_str(), &width, &height, &nr_channels, 0);
-    if (!texture_data) {
-        throw std::runtime_error("Failed to load texture " + path);
-        return;
-    }
-
-    glGenTextures(1, &sector_t);
-    glBindTexture(GL_TEXTURE_2D, sector_t);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE,
-                 texture_data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    stbi_image_free(texture_data);
 
     geo = Shader(
         "assets/sector.vs", "assets/sector.fs",
@@ -127,10 +104,6 @@ Session::Session() {
             glUniformMatrix4fv(uloc("view_projection"), 1, GL_FALSE,
                                value_ptr(se.camera.perspective() * se.camera.view_matrix()));
             glUniform3f(uloc("view_pos"), se.camera.pos.x, se.camera.pos.y, se.camera.pos.z);
-
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, sector_t);
-            glUniform1i(uloc("sector_t"), 0);
 
             glUniform1f(uloc("dir_light.intensity"), 1);
             glUniform3f(uloc("dir_light.dir"), 0, -1, -1);
