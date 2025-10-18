@@ -49,9 +49,6 @@ MeshStatic MeshStatic::from_scene(std::string file, u32 _diffuse_id, u32 _spectr
     for (usize midx = 0; midx < scene->mNumMeshes; midx++) {
         aiMesh* mesh = scene->mMeshes[midx];
 
-        // TODO: Write Blender python script that splits mesh based on seams and groups them.
-        log_info("%s", mesh->mName.C_Str());
-
         vec3 sector_color = vec3(dist(gen), dist(gen), dist(gen));
 
         for (size i = 0; i < mesh->mNumFaces; i++) {
