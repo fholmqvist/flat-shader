@@ -32,6 +32,7 @@ Session::Session() {
     sofa = MeshStatic::from_scene("assets/sofa.obj");
     chair = MeshStatic::from_scene("assets/chair.obj");
     table = MeshStatic::from_scene("assets/table.obj");
+    desk = MeshStatic::from_scene("assets/desk.obj");
 
     geo = Shader(
         "assets/sector.vs", "assets/sector.fs",
@@ -121,6 +122,10 @@ Session::Session() {
             se.chair.position = vec3(0, 0, -0.6);
             se.chair.rotation.y = DEG2RAD(-90);
             se.chair.draw(s.ID);
+
+            se.desk.position = vec3(0, 0, -0.4);
+            se.desk.rotation.y = DEG2RAD(-90);
+            se.desk.draw(s.ID);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         });
