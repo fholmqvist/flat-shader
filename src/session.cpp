@@ -119,11 +119,11 @@ Session::Session() {
 
             se.table.draw(s.ID);
 
-            se.chair.position = vec3(0, 0, -0.6);
+            se.chair.position = vec3(0, 0, -0.7);
             se.chair.rotation.y = DEG2RAD(-90);
             se.chair.draw(s.ID);
 
-            se.desk.position = vec3(0, 0, -0.4);
+            se.desk.position = vec3(0, 0, -0.5);
             se.desk.rotation.y = DEG2RAD(-90);
             se.desk.draw(s.ID);
 
