@@ -25,6 +25,7 @@ struct Session {
     MeshStatic room;
 
     Shader geo;
+    Shader shadows;
     Shader lines;
     Shader fxaa;
 

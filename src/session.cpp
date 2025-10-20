@@ -18,6 +18,21 @@ GLuint buffer2_color;
 
 #define uloc(name) glGetUniformLocation(s.ID, name)
 
+vec3 LIGHT_DIR(-1, -2.5, -1);
+mat4 LIGHT_SPACE;
+
+void update_light_space() {
+    const float OFFSET = 16;
+    const float NEAR = 0.1;
+    const float FAR = OFFSET * 4;
+
+    mat4 light_view = lookAt(-LIGHT_DIR * OFFSET, vec3(0, 0, 0), vec3(0, 1, 0));
+
+    mat4 light_projection = ortho(-OFFSET, OFFSET, -OFFSET, OFFSET, NEAR, FAR);
+
+    LIGHT_SPACE = light_projection * light_view;
+}
+
 Session::Session() {
     log_info("Starting");
     if (!window.init()) {
@@ -145,6 +160,66 @@ Session::Session() {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         });
 
+    shadows = Shader(
+        "assets/shadows.vs", "assets/shadows.fs",
+        [](Shader &) {
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                                  (void*)(offsetof(Vertex, pos)));
+            glEnableVertexAttribArray(0);
+
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                                  (void*)(offsetof(Vertex, normal)));
+            glEnableVertexAttribArray(1);
+
+            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                                  (void*)(offsetof(Vertex, uv)));
+            glEnableVertexAttribArray(2);
+        },
+        [](Shader &s, Session &se) {
+            glBindFramebuffer(GL_FRAMEBUFFER, buffer);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            glUniformMatrix4fv(uloc("projection"), 1, GL_FALSE, value_ptr(se.camera.perspective()));
+            glUniformMatrix4fv(uloc("view"), 1, GL_FALSE, value_ptr(se.camera.view_matrix()));
+
+            update_light_space();
+            glUniformMatrix4fv(uloc("light_space_matrix"), 1, GL_FALSE, &LIGHT_SPACE[0][0]);
+            glUniform3fv(uloc("light_dir"), 1, &LIGHT_DIR[0]);
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, buffer_depth);
+            glUniform1i(glGetUniformLocation(s.ID, "shadow_t"), 0);
+
+            se.sofa.position = vec3(-0.2, 0, 0);
+            se.sofa.rotation.y = DEG2RAD(0);
+            se.sofa.draw(s.ID);
+            se.sofa.position = vec3(0.2, 0, 0);
+            se.sofa.rotation.y = DEG2RAD(180);
+            se.sofa.draw(s.ID);
+
+            se.table.draw(s.ID);
+
+            se.chair.position = vec3(0, 0, -0.5);
+            se.chair.rotation.y = DEG2RAD(-90);
+            se.chair.draw(s.ID);
+
+            se.chair.position = vec3(0, 0, 0.3);
+            se.chair.rotation.y = DEG2RAD(90);
+            se.chair.draw(s.ID);
+
+            se.desk.position = vec3(0, 0, -0.35);
+            se.desk.rotation.y = DEG2RAD(-90);
+            se.desk.draw(s.ID);
+
+            se.bookshelf.position = vec3(-0.5, 0, -0.25);
+            se.bookshelf.draw(s.ID);
+
+            se.room.position.z = 0.1;
+            se.room.draw(s.ID);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        });
+
     lines = Shader(
         "assets/final.vs", "assets/final.fs",
         [](Shader &) {
@@ -225,6 +300,7 @@ Session::Session() {
         });
 
     geo.init();
+    shadows.init();
     lines.init();
     fxaa.init();
 
@@ -241,6 +317,7 @@ void Session::render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     geo.render(*this);
+    shadows.render(*this);
     lines.render(*this);
     fxaa.render(*this);
 
