@@ -16,91 +16,32 @@ GLuint buffer_depth;
 GLuint buffer2;
 GLuint buffer2_color;
 
-#define uloc(name) glGetUniformLocation(s.ID, name)
-
 vec3 LIGHT_DIR(0, -1, 0);
 mat4 LIGHT_SPACE;
 
-void update_light_space() {
-    const float OFFSET = 16;
-    const float NEAR = 0.1;
-    const float FAR = OFFSET * 4;
+#define uloc(name) glGetUniformLocation(s.ID, name)
 
-    mat4 light_view = lookAt(-LIGHT_DIR * OFFSET, vec3(0, 0, 0), vec3(0, 1, 0));
-
-    mat4 light_projection = ortho(-OFFSET, OFFSET, -OFFSET, OFFSET, NEAR, FAR);
-
-    LIGHT_SPACE = light_projection * light_view;
-}
+void update_light_space();
 
 Session::Session() {
     log_info("Starting");
+
     if (!window.init()) {
         throw std::runtime_error("Window failed to initialize");
     }
 
-    store_glsl_helper("assets/model.glsl");
-    store_glsl_helper("assets/lights.glsl");
-    store_glsl_helper("assets/lights_calc.glsl");
+    load_glsl_helpers();
+
+    load_objects();
+
+    generate_buffers();
 
     camera.pos = { 0.7, 1.1, 1.2 };
     camera.rot = { -120, -30 };
 
-    sofa = MeshStatic::from_scene("assets/sofa.obj");
-    chair = MeshStatic::from_scene("assets/chair.obj");
-    table = MeshStatic::from_scene("assets/table.obj");
-    desk = MeshStatic::from_scene("assets/desk.obj");
-    bookshelf = MeshStatic::from_scene("assets/bookshelf.obj");
-    room = MeshStatic::from_scene("assets/room.obj");
-
     geo = Shader(
         "assets/sector.vs", "assets/sector.fs",
         [](Shader &) {
-            glGenFramebuffers(1, &buffer);
-            glBindFramebuffer(GL_FRAMEBUFFER, buffer);
-
-            glGenTextures(1, &buffer_sector);
-            glBindTexture(GL_TEXTURE_2D, buffer_sector);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_FLOAT,
-                         nullptr);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                                   buffer_sector, 0);
-
-            glGenTextures(1, &buffer_texture);
-            glBindTexture(GL_TEXTURE_2D, buffer_texture);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_FLOAT,
-                         nullptr);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D,
-                                   buffer_texture, 0);
-
-            glGenTextures(1, &buffer_depth);
-            glBindTexture(GL_TEXTURE_2D, buffer_depth);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, SCREEN_W, SCREEN_H, 0,
-                         GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, buffer_depth,
-                                   0);
-
-            GLenum attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-            glDrawBuffers(2, attachments);
-
-            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-                log_dang("Framebuffer not complete");
-            }
-
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                                   (void*)(offsetof(Vertex, pos)));
             glEnableVertexAttribArray(0);
@@ -327,4 +268,74 @@ void Session::render() {
     fxaa.render(*this);
 
     window.swap();
+}
+
+void Session::load_glsl_helpers() {
+    store_glsl_helper("assets/model.glsl");
+    store_glsl_helper("assets/lights.glsl");
+    store_glsl_helper("assets/lights_calc.glsl");
+}
+
+void Session::load_objects() {
+    sofa = MeshStatic::from_scene("assets/sofa.obj");
+    chair = MeshStatic::from_scene("assets/chair.obj");
+    table = MeshStatic::from_scene("assets/table.obj");
+    desk = MeshStatic::from_scene("assets/desk.obj");
+    bookshelf = MeshStatic::from_scene("assets/bookshelf.obj");
+    room = MeshStatic::from_scene("assets/room.obj");
+}
+
+void Session::generate_buffers() {
+
+    glGenFramebuffers(1, &buffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, buffer);
+
+    glGenTextures(1, &buffer_sector);
+    glBindTexture(GL_TEXTURE_2D, buffer_sector);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, buffer_sector, 0);
+
+    glGenTextures(1, &buffer_texture);
+    glBindTexture(GL_TEXTURE_2D, buffer_texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, buffer_texture, 0);
+
+    glGenTextures(1, &buffer_depth);
+    glBindTexture(GL_TEXTURE_2D, buffer_depth);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, SCREEN_W, SCREEN_H, 0, GL_DEPTH_COMPONENT,
+                 GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, buffer_depth, 0);
+
+    GLenum attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+    glDrawBuffers(2, attachments);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        log_dang("Framebuffer not complete");
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void update_light_space() {
+    const float OFFSET = 16;
+    const float NEAR = 0.1;
+    const float FAR = OFFSET * 4;
+
+    mat4 light_view = lookAt(-LIGHT_DIR * OFFSET, vec3(0, 0, 0), vec3(0, 1, 0));
+
+    mat4 light_projection = ortho(-OFFSET, OFFSET, -OFFSET, OFFSET, NEAR, FAR);
+
+    LIGHT_SPACE = light_projection * light_view;
 }

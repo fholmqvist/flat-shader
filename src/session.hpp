@@ -33,4 +33,9 @@ struct Session {
 
     void update();
     void render();
+
+  private:
+    void load_glsl_helpers();
+    void generate_buffers();
+    void load_objects();
 };
