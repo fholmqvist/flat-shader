@@ -19,12 +19,13 @@ out vec2 _uv;
 out vec4 _light_space;
 
 void main() {
-    mat4 model = model_matrix(world_pos, rotation, scale);
+    mat4 model     = model_matrix(world_pos, rotation, scale);
+    vec4 final_pos = model * vec4(pos, 1);
 
-    _frag_pos     = vec3(model * vec4(pos, 1));
-    _normal       = mat3(transpose(inverse(model))) * normal;
-    _light_space  = light_space * vec4(_frag_pos, 1);
+    _frag_pos     = vec3(final_pos);
+    _normal       = normalize(mat3(model) * normal);
+    _light_space  = light_space * final_pos;
     _uv           = uv;
 
-    gl_Position   = view_projection * vec4(_frag_pos, 1);
+    gl_Position = view_projection * final_pos;
 }
