@@ -116,10 +116,7 @@ void MeshStatic::gl_buffer_data() {
 }
 
 void MeshStatic::gl_uniforms(u32 shader_id) {
-    glUniform3f(glGetUniformLocation(shader_id, "world_pos"), position.x, position.y,
-                position.z);
+    glUniform3f(glGetUniformLocation(shader_id, "world_pos"), position.x, position.y, position.z);
     glUniform3f(glGetUniformLocation(shader_id, "rotation"), rotation.x, rotation.y, rotation.z);
     glUniform1f(glGetUniformLocation(shader_id, "scale"), scale);
-
-    glUniform1f(glGetUniformLocation(shader_id, "rand"), position.x);
 }

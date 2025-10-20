@@ -18,7 +18,7 @@ GLuint buffer2_color;
 
 #define uloc(name) glGetUniformLocation(s.ID, name)
 
-vec3 LIGHT_DIR(-1, -2.5, -1);
+vec3 LIGHT_DIR(0, -1, 0);
 mat4 LIGHT_SPACE;
 
 void update_light_space() {
@@ -176,19 +176,24 @@ Session::Session() {
             glEnableVertexAttribArray(2);
         },
         [](Shader &s, Session &se) {
-            glBindFramebuffer(GL_FRAMEBUFFER, buffer);
+            // TODO: Depth shader needs to use light information.
+            glBindFramebuffer(GL_FRAMEBUFFER, buffer2);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            glUniformMatrix4fv(uloc("projection"), 1, GL_FALSE, value_ptr(se.camera.perspective()));
-            glUniformMatrix4fv(uloc("view"), 1, GL_FALSE, value_ptr(se.camera.view_matrix()));
+            glUniformMatrix4fv(uloc("view_projection"), 1, GL_FALSE,
+                               value_ptr(se.camera.perspective() * se.camera.view_matrix()));
 
             update_light_space();
-            glUniformMatrix4fv(uloc("light_space_matrix"), 1, GL_FALSE, &LIGHT_SPACE[0][0]);
+            glUniformMatrix4fv(uloc("light_space"), 1, GL_FALSE, &LIGHT_SPACE[0][0]);
             glUniform3fv(uloc("light_dir"), 1, &LIGHT_DIR[0]);
 
             glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, buffer_sector);
+            glUniform1i(glGetUniformLocation(s.ID, "sector_t"), 0);
+
+            glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, buffer_depth);
-            glUniform1i(glGetUniformLocation(s.ID, "shadow_t"), 0);
+            glUniform1i(glGetUniformLocation(s.ID, "shadow_t"), 1);
 
             se.sofa.position = vec3(-0.2, 0, 0);
             se.sofa.rotation.y = DEG2RAD(0);
@@ -318,7 +323,7 @@ void Session::render() {
 
     geo.render(*this);
     shadows.render(*this);
-    lines.render(*this);
+    // lines.render(*this);
     fxaa.render(*this);
 
     window.swap();
