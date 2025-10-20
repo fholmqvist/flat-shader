@@ -36,6 +36,7 @@ Session::Session() {
     table = MeshStatic::from_scene("assets/table.obj");
     desk = MeshStatic::from_scene("assets/desk.obj");
     bookshelf = MeshStatic::from_scene("assets/bookshelf.obj");
+    room = MeshStatic::from_scene("assets/room.obj");
 
     geo = Shader(
         "assets/sector.vs", "assets/sector.fs",
@@ -114,25 +115,32 @@ Session::Session() {
 
             glUniform3f(uloc("color"), 0.99, 0.67, 0.12);
 
-            se.sofa.position = vec3(-0.3, 0, 0);
+            se.sofa.position = vec3(-0.2, 0, 0);
             se.sofa.rotation.y = DEG2RAD(0);
             se.sofa.draw(s.ID);
-            se.sofa.position = vec3(0.3, 0, 0);
+            se.sofa.position = vec3(0.2, 0, 0);
             se.sofa.rotation.y = DEG2RAD(180);
             se.sofa.draw(s.ID);
 
             se.table.draw(s.ID);
 
-            se.chair.position = vec3(0, 0, -0.7);
+            se.chair.position = vec3(0, 0, -0.5);
             se.chair.rotation.y = DEG2RAD(-90);
             se.chair.draw(s.ID);
 
-            se.desk.position = vec3(0, 0, -0.5);
+            se.chair.position = vec3(0, 0, 0.3);
+            se.chair.rotation.y = DEG2RAD(90);
+            se.chair.draw(s.ID);
+
+            se.desk.position = vec3(0, 0, -0.35);
             se.desk.rotation.y = DEG2RAD(-90);
             se.desk.draw(s.ID);
 
-            se.bookshelf.position = vec3(-0.6, 0, -0.5);
+            se.bookshelf.position = vec3(-0.5, 0, -0.25);
             se.bookshelf.draw(s.ID);
+
+            se.room.position.z = 0.1;
+            se.room.draw(s.ID);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         });

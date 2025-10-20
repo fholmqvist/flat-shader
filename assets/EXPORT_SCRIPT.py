@@ -65,3 +65,7 @@ bpy.ops.export_scene.obj(
 
 obj.select = True
 bpy.ops.object.join()
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_all(action='TOGGLE')
+bpy.ops.mesh.remove_doubles()
+bpy.ops.object.mode_set(mode='OBJECT')
