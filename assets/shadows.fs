@@ -45,6 +45,5 @@ vec4 with_shadows(vec4 tex) {
 }
 
 void main() {
-    // FragColor = with_shadows(texture(sector_t, _uv));
-    FragColor = vec4(1);
+    FragColor = with_shadows(texture(sector_t, _uv));
 }
