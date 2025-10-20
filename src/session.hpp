@@ -24,7 +24,8 @@ struct Session {
     MeshStatic bookshelf;
 
     Shader geo;
-    Shader result;
+    Shader lines;
+    Shader fxaa;
 
     Session();
 

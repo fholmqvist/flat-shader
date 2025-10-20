@@ -13,6 +13,8 @@ GLuint buffer;
 GLuint buffer_sector;
 GLuint buffer_texture;
 GLuint buffer_depth;
+GLuint buffer2;
+GLuint buffer2_color;
 
 #define uloc(name) glGetUniformLocation(s.ID, name)
 
@@ -111,6 +113,7 @@ Session::Session() {
             glUniform3f(uloc("dir_light.dir"), 0, -1, -1);
 
             glUniform3f(uloc("color"), 0.99, 0.67, 0.12);
+
             se.sofa.position = vec3(-0.3, 0, 0);
             se.sofa.rotation.y = DEG2RAD(0);
             se.sofa.draw(s.ID);
@@ -133,9 +136,22 @@ Session::Session() {
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         });
-    result = Shader(
+
+    lines = Shader(
         "assets/final.vs", "assets/final.fs",
         [](Shader &) {
+            glGenFramebuffers(1, &buffer2);
+            glBindFramebuffer(GL_FRAMEBUFFER, buffer2);
+
+            glGenTextures(1, &buffer2_color);
+            glBindTexture(GL_TEXTURE_2D, buffer2_color);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_UNSIGNED_BYTE,
+                         nullptr);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                                   buffer2_color, 0);
+
             glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
             glEnableVertexAttribArray(0);
 
@@ -147,8 +163,13 @@ Session::Session() {
                                    -1, 1, 0, 1, 1,  -1, 1, 0, 1, 1,  1, 1 };
 
             glBufferData(GL_ARRAY_BUFFER, sizeof(quad_verts), quad_verts, GL_STATIC_DRAW);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
         },
         [](Shader &s, Session &) {
+            glBindFramebuffer(GL_FRAMEBUFFER, buffer2);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, buffer_sector);
             glUniform1i(uloc("sector_t"), 0);
@@ -164,10 +185,40 @@ Session::Session() {
             glUniform2f(uloc("texel_size"), 1.0f / SCREEN_W, 1.0f / SCREEN_H);
 
             glDrawArrays(GL_TRIANGLES, 0, 6);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        });
+
+    fxaa = Shader(
+        "assets/final.vs", "assets/fxaa.fs",
+        [](Shader &) {
+            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+            glEnableVertexAttribArray(0);
+
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
+                                  (void*)(2 * sizeof(float)));
+            glEnableVertexAttribArray(1);
+
+            float quad_verts[] = { -1, 1, 0, 1, -1, -1, 0, 0, 1, -1, 1, 0,
+                                   -1, 1, 0, 1, 1,  -1, 1, 0, 1, 1,  1, 1 };
+
+            glBufferData(GL_ARRAY_BUFFER, sizeof(quad_verts), quad_verts, GL_STATIC_DRAW);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        },
+        [](Shader &s, Session &) {
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, buffer2_color);
+            glUniform1i(uloc("input_t"), 0);
+
+            glUniform2f(uloc("texel_size"), 1.0f / SCREEN_W, 1.0f / SCREEN_H);
+
+            glDrawArrays(GL_TRIANGLES, 0, 6);
         });
 
     geo.init();
-    result.init();
+    lines.init();
+    fxaa.init();
 
     log_info("Started in %s (total)", time_to_string(timer.stop()).c_str());
 }
@@ -182,7 +233,8 @@ void Session::render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     geo.render(*this);
-    result.render(*this);
+    lines.render(*this);
+    fxaa.render(*this);
 
     window.swap();
 }

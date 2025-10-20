@@ -11,7 +11,7 @@ uniform vec2 texel_size;
 out vec4 FragColor;
 
 float threshold = 0.05;
-const int base_radius = 2;
+const int base_radius = 1;
 
 const vec3 BLACK = vec3(0);
 
@@ -46,7 +46,7 @@ void main() {
 
     edge = clamp(edge / float(samples), 0, 1);
 
-    edge = edge > 0.2 ? 1 : 0;
+    edge = smoothstep(0.1, 0.2, edge);
 
     vec3 final = texture(texture_t, _uv).rgb;
 
