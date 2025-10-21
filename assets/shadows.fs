@@ -12,7 +12,11 @@ layout (location = 1) out vec3 texture_out;
 
 uniform vec3 light_dir;
 
+uniform vec3 color;
+
 uniform sampler2D shadow_t;
+
+const vec3 BLACK = vec3(0);
 
 float shadow_calculation(vec4 light_space, vec3 dir_light) {
     vec3 coords = light_space.xyz / light_space.w;
@@ -40,14 +44,14 @@ vec3 with_shadows(vec3 tex) {
     float shadow = shadow_calculation(_light_space, dir_light);
     vec3 directional_shade = vec3((1 - shadow) * diff);
 
-    directional_shade = directional_shade.r > 0.5 ? vec3(1) : vec3(0);
+    // directional_shade = directional_shade.r > 0.5 ? vec3(1) : BLACK;
 
-    return tex * directional_shade;
+    vec3 shade = tex * directional_shade;
+    float avg = (shade.r + shade.g + shade.b) / 3;
+    return avg > 0.25 ? tex : mix(tex, BLACK, 0.9);
 }
 
 void main() {
-    // FragColor = with_shadows(texture(sector_t, _uv));
-    sector_out = with_shadows(_sector_color);
-    texture_out = with_shadows(vec3(1));
-    // FragColor = texture(shadow_t, _uv);
+    sector_out = _sector_color;
+    texture_out = with_shadows(color);
 }

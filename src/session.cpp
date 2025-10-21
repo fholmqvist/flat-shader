@@ -125,6 +125,8 @@ Session::Session() {
             glBindTexture(GL_TEXTURE_2D, shadow_depth);
             glUniform1i(glGetUniformLocation(s.ID, "shadow_t"), 0);
 
+            glUniform3f(uloc("color"), 0.99, 0.67, 0.12);
+
             se.sofa.position = vec3(-0.2, 0, 0);
             se.sofa.rotation.y = DEG2RAD(0);
             se.sofa.draw(s.ID);
