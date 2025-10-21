@@ -34,6 +34,7 @@ struct Session {
 
     void update();
     void render();
+    void draw_objects(u32 shader_id);
 
   private:
     void load_glsl_helpers();

@@ -57,32 +57,7 @@ Session::Session() {
             update_light_space(se.camera);
             glUniformMatrix4fv(uloc("light_space"), 1, GL_FALSE, &LIGHT_SPACE[0][0]);
 
-            se.sofa.position = vec3(-0.2, 0, 0);
-            se.sofa.rotation.y = DEG2RAD(0);
-            se.sofa.draw(s.ID);
-            se.sofa.position = vec3(0.2, 0, 0);
-            se.sofa.rotation.y = DEG2RAD(180);
-            se.sofa.draw(s.ID);
-
-            se.table.draw(s.ID);
-
-            se.chair.position = vec3(0, 0, -0.5);
-            se.chair.rotation.y = DEG2RAD(-90);
-            se.chair.draw(s.ID);
-
-            se.chair.position = vec3(0, 0, 0.3);
-            se.chair.rotation.y = DEG2RAD(90);
-            se.chair.draw(s.ID);
-
-            se.desk.position = vec3(0, 0, -0.35);
-            se.desk.rotation.y = DEG2RAD(-90);
-            se.desk.draw(s.ID);
-
-            se.bookshelf.position = vec3(-0.5, 0, -0.25);
-            se.bookshelf.draw(s.ID);
-
-            se.room.position.z = 0.1;
-            se.room.draw(s.ID);
+            se.draw_objects(s.ID);
 
             glViewport(0, 0, SCREEN_W, SCREEN_H);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -121,32 +96,7 @@ Session::Session() {
             glBindTexture(GL_TEXTURE_2D, shadow_depth);
             glUniform1i(glGetUniformLocation(s.ID, "shadow_t"), 0);
 
-            se.sofa.position = vec3(-0.2, 0, 0);
-            se.sofa.rotation.y = DEG2RAD(0);
-            se.sofa.draw(s.ID);
-            se.sofa.position = vec3(0.2, 0, 0);
-            se.sofa.rotation.y = DEG2RAD(180);
-            se.sofa.draw(s.ID);
-
-            se.table.draw(s.ID);
-
-            se.chair.position = vec3(0, 0, -0.5);
-            se.chair.rotation.y = DEG2RAD(-90);
-            se.chair.draw(s.ID);
-
-            se.chair.position = vec3(0, 0, 0.3);
-            se.chair.rotation.y = DEG2RAD(90);
-            se.chair.draw(s.ID);
-
-            se.desk.position = vec3(0, 0, -0.35);
-            se.desk.rotation.y = DEG2RAD(-90);
-            se.desk.draw(s.ID);
-
-            se.bookshelf.position = vec3(-0.5, 0, -0.25);
-            se.bookshelf.draw(s.ID);
-
-            se.room.position.z = 0.1;
-            se.room.draw(s.ID);
+            se.draw_objects(s.ID);
 
             glEnable(GL_CULL_FACE);
 
@@ -243,6 +193,35 @@ void Session::render() {
     fxaa.render(*this);
 
     window.swap();
+}
+
+void Session::draw_objects(u32 shader_id) {
+    sofa.position = vec3(-0.2, 0, 0);
+    sofa.rotation.y = DEG2RAD(0);
+    sofa.draw(shader_id);
+    sofa.position = vec3(0.2, 0, 0);
+    sofa.rotation.y = DEG2RAD(180);
+    sofa.draw(shader_id);
+
+    table.draw(shader_id);
+
+    chair.position = vec3(0, 0, -0.5);
+    chair.rotation.y = DEG2RAD(-90);
+    chair.draw(shader_id);
+
+    chair.position = vec3(0, 0, 0.3);
+    chair.rotation.y = DEG2RAD(90);
+    chair.draw(shader_id);
+
+    desk.position = vec3(0, 0, -0.35);
+    desk.rotation.y = DEG2RAD(-90);
+    desk.draw(shader_id);
+
+    bookshelf.position = vec3(-0.5, 0, -0.25);
+    bookshelf.draw(shader_id);
+
+    room.position.z = 0.1;
+    room.draw(shader_id);
 }
 
 void Session::load_glsl_helpers() {
