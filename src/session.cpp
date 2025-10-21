@@ -197,32 +197,37 @@ void Session::render() {
 }
 
 void Session::draw_objects(u32 shader_id) {
-    sofa.position = vec3(-0.2, 0, 0);
-    sofa.rotation.y = DEG2RAD(0);
-    sofa.draw(shader_id);
-    sofa.position = vec3(0.2, 0, 0);
-    sofa.rotation.y = DEG2RAD(180);
-    sofa.draw(shader_id);
+    for (int z = 0; z < 1; z++) {
+        for (int x = 0; x < 1; x++) {
+            sofa.position = vec3(-0.2 + x, 0, 0 + z);
+            sofa.rotation.y = DEG2RAD(0);
+            sofa.draw(shader_id);
+            sofa.position = vec3(0.2 + x, 0, 0 + z);
+            sofa.rotation.y = DEG2RAD(180);
+            sofa.draw(shader_id);
 
-    table.draw(shader_id);
+            table.draw(shader_id);
 
-    chair.position = vec3(0, 0, -0.5);
-    chair.rotation.y = DEG2RAD(-90);
-    chair.draw(shader_id);
+            chair.position = vec3(0 + x, 0, -0.5 + z);
+            chair.rotation.y = DEG2RAD(-90);
+            chair.draw(shader_id);
 
-    chair.position = vec3(0, 0, 0.3);
-    chair.rotation.y = DEG2RAD(90);
-    chair.draw(shader_id);
+            chair.position = vec3(0 + x, 0, 0.3 + z);
+            chair.rotation.y = DEG2RAD(90);
+            chair.draw(shader_id);
 
-    desk.position = vec3(0, 0, -0.35);
-    desk.rotation.y = DEG2RAD(-90);
-    desk.draw(shader_id);
+            desk.position = vec3(0 + x, 0, -0.35 + z);
+            desk.rotation.y = DEG2RAD(-90);
+            desk.draw(shader_id);
 
-    bookshelf.position = vec3(-0.5, 0, -0.25);
-    bookshelf.draw(shader_id);
+            bookshelf.position = vec3(-0.5 + x, 0, -0.25 + z);
+            bookshelf.draw(shader_id);
 
-    room.position.z = 0.1;
-    room.draw(shader_id);
+            room.position.x = 0 + x;
+            room.position.z = 0.1 + z;
+            room.draw(shader_id);
+        }
+    }
 }
 
 void Session::load_glsl_helpers() {
