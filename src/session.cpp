@@ -11,14 +11,16 @@
 
 int SHADOW_SIZE = 4096;
 
+GLuint shadow_fbo;
+GLuint shadow_depth;
+
 GLuint buffer;
 GLuint buffer_sector;
 GLuint buffer_texture;
-GLuint buffer_depth;
 GLuint buffer2;
 GLuint buffer2_color;
 
-vec3 LIGHT_DIR(1, -1, -1);
+vec3 LIGHT_DIR(0.25, -1, -1);
 mat4 LIGHT_SPACE;
 
 #define uloc(name) glGetUniformLocation(s.ID, name)
@@ -50,8 +52,8 @@ Session::Session() {
         },
         [](Shader &s, Session &se) {
             glViewport(0, 0, SHADOW_SIZE, SHADOW_SIZE);
-            glBindFramebuffer(GL_FRAMEBUFFER, buffer);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
+            glClear(GL_DEPTH_BUFFER_BIT);
 
             update_light_space();
             glUniformMatrix4fv(uloc("light_space"), 1, GL_FALSE, &LIGHT_SPACE[0][0]);
@@ -80,10 +82,8 @@ Session::Session() {
             se.bookshelf.position = vec3(-0.5, 0, -0.25);
             se.bookshelf.draw(s.ID);
 
-            se.ground.draw(s.ID);
-
-            // se.room.position.z = 0.1;
-            // se.room.draw(s.ID);
+            se.room.position.z = 0.1;
+            se.room.draw(s.ID);
 
             glViewport(0, 0, SCREEN_W, SCREEN_H);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -119,7 +119,7 @@ Session::Session() {
             glUniform1i(glGetUniformLocation(s.ID, "sector_t"), 0);
 
             glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, buffer_depth);
+            glBindTexture(GL_TEXTURE_2D, shadow_depth);
             glUniform1i(glGetUniformLocation(s.ID, "shadow_t"), 1);
 
             se.sofa.position = vec3(-0.2, 0, 0);
@@ -146,10 +146,8 @@ Session::Session() {
             se.bookshelf.position = vec3(-0.5, 0, -0.25);
             se.bookshelf.draw(s.ID);
 
-            se.ground.draw(s.ID);
-
-            // se.room.position.z = 0.1;
-            // se.room.draw(s.ID);
+            se.room.position.z = 0.1;
+            se.room.draw(s.ID);
 
             // glBindFramebuffer(GL_FRAMEBUFFER, 0);
         });
@@ -225,10 +223,32 @@ void Session::load_objects() {
     desk = MeshStatic::from_scene("assets/desk.obj");
     bookshelf = MeshStatic::from_scene("assets/bookshelf.obj");
     room = MeshStatic::from_scene("assets/room.obj");
-    ground = MeshStatic::from_scene("assets/ground.obj");
 }
 
 void Session::generate_buffers() {
+    glGenFramebuffers(1, &shadow_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
+
+    glGenTextures(1, &shadow_depth);
+    glBindTexture(GL_TEXTURE_2D, shadow_depth);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, SHADOW_SIZE, SHADOW_SIZE, 0,
+                 GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadow_depth, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        log_dang("Shadow framebuffer not complete");
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     glGenFramebuffers(1, &buffer);
     glBindFramebuffer(GL_FRAMEBUFFER, buffer);
 
@@ -250,18 +270,8 @@ void Session::generate_buffers() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, buffer_texture, 0);
 
-    glGenTextures(1, &buffer_depth);
-    glBindTexture(GL_TEXTURE_2D, buffer_depth);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, SHADOW_SIZE, SHADOW_SIZE, 0,
-                 GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, buffer_depth, 0);
-
-    GLenum attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-    glDrawBuffers(2, attachments);
+    GLenum attachments[1] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(1, attachments);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         log_dang("Framebuffer not complete");
@@ -271,9 +281,9 @@ void Session::generate_buffers() {
 }
 
 void update_light_space() {
-    const float OFFSET = 80;
-    const float NEAR = 1;
-    const float FAR = 400;
+    const float OFFSET = 4;
+    const float NEAR = 0.1;
+    const float FAR = OFFSET * 4;
 
     mat4 light_view = lookAt(-LIGHT_DIR * OFFSET, vec3(0, 0, 0), vec3(0, 1, 0));
 
