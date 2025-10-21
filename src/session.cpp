@@ -1,3 +1,4 @@
+#include "color.hpp"
 #include "pch.hpp"
 
 #include "session.hpp"
@@ -231,12 +232,12 @@ void Session::load_glsl_helpers() {
 }
 
 void Session::load_objects() {
-    sofa = MeshStatic::from_scene("assets/sofa.obj");
-    chair = MeshStatic::from_scene("assets/chair.obj");
-    table = MeshStatic::from_scene("assets/table.obj");
-    desk = MeshStatic::from_scene("assets/desk.obj");
-    bookshelf = MeshStatic::from_scene("assets/bookshelf.obj");
-    room = MeshStatic::from_scene("assets/room.obj");
+    sofa = MeshStatic::from_scene("assets/sofa.obj", palette[5]);
+    chair = MeshStatic::from_scene("assets/chair.obj", palette[2]);
+    table = MeshStatic::from_scene("assets/table.obj", palette[1]);
+    desk = MeshStatic::from_scene("assets/desk.obj", palette[0]);
+    bookshelf = MeshStatic::from_scene("assets/bookshelf.obj", palette[5]);
+    room = MeshStatic::from_scene("assets/room.obj", palette[0]);
 }
 
 void Session::generate_buffers() {
