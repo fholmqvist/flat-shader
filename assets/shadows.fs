@@ -44,14 +44,12 @@ vec3 with_shadows(vec3 tex) {
     float shadow = shadow_calculation(_light_space, dir_light);
     vec3 directional_shade = vec3((1 - shadow) * diff);
 
-    // directional_shade = directional_shade.r > 0.5 ? vec3(1) : BLACK;
-
     vec3 shade = tex * directional_shade;
     float avg = (shade.r + shade.g + shade.b) / 3;
     return avg > 0.25 ? tex : mix(tex, BLACK, 0.9);
 }
 
 void main() {
-    sector_out = _sector_color;
+    sector_out  = _sector_color;
     texture_out = with_shadows(color);
 }

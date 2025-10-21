@@ -23,7 +23,7 @@ GLuint lines_fbo;
 GLuint lines_depth;
 GLuint lines_texture;
 
-vec3 LIGHT_DIR(0.25, -1, -1);
+vec3 LIGHT_DIR = vec3(0.25, -1, 1);
 mat4 LIGHT_SPACE;
 
 #define uloc(name) glGetUniformLocation(s.ID, name)
@@ -153,6 +153,8 @@ Session::Session() {
 
             se.room.position.z = 0.1;
             se.room.draw(s.ID);
+
+            glEnable(GL_CULL_FACE);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         });
