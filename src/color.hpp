@@ -1,6 +1,6 @@
 #pragma once
 
-// https://lospec.com/palette-list/japanese-woodblock
+// https://lospec.com/palette-list/antiquity16
 extern std::vector<vec3> palette;
 
 vec3 random_color();

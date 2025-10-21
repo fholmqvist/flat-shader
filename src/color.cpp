@@ -1,9 +1,12 @@
 #include "color.hpp"
 
 std::vector<vec3> palette = {
-    hex_to_rgb("#2b2821"), hex_to_rgb("#624c3c"), hex_to_rgb("#d9ac8b"), hex_to_rgb("#e3cfb4"),
-    hex_to_rgb("#243d5c"), hex_to_rgb("#5d7275"), hex_to_rgb("#5c8b93"), hex_to_rgb("#b1a58d"),
-    hex_to_rgb("#b03a48"), hex_to_rgb("#d4804d"), hex_to_rgb("#e0c872"), hex_to_rgb("#3e6958"),
+    hex_to_rgb("#5d7557"), //
+    hex_to_rgb("#8e9257"), //
+    hex_to_rgb("#e55d4d"), //
+    hex_to_rgb("#f1866c"), //
+    hex_to_rgb("#d26730"), //
+    hex_to_rgb("#de9a28"), //
 };
 
 static std::random_device rd;

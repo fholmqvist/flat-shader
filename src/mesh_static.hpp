@@ -12,7 +12,7 @@ struct MeshStatic {
     vec3 rotation = vec3(0);
     float scale = 1;
 
-    static MeshStatic from_scene(std::string file);
+    static MeshStatic from_scene(std::string file, std::optional<vec3> color = std::nullopt);
 
     void draw(u32 shader_id);
 

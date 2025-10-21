@@ -1,5 +1,6 @@
-#include "color.hpp"
 #include "pch.hpp"
+
+#include "color.hpp"
 
 #include "mesh_static.hpp"
 
@@ -10,7 +11,7 @@ static std::random_device rd;
 static std::mt19937 gen(rd());
 static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
-MeshStatic MeshStatic::from_scene(std::string file) {
+MeshStatic MeshStatic::from_scene(std::string file, std::optional<vec3> color) {
     Assimp::Importer import;
 
     aiScene* scene = (aiScene*)import.ReadFile(
@@ -79,7 +80,11 @@ MeshStatic MeshStatic::from_scene(std::string file) {
         }
     }
 
-    m.color = random_color();
+    if (color.has_value()) {
+        m.color = color.value();
+    } else {
+        m.color = random_color();
+    }
 
     assert(m.verts.size() > 0);
     assert(m.indices.size() > 0);
