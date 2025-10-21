@@ -38,13 +38,15 @@ vec4 with_shadows(vec4 tex) {
     float shadow = shadow_calculation(_light_space, dir_light);
     vec3 directional_shade = vec3((1 - shadow) * diff);
 
-    vec3 ambient = vec3(0.2);
-    vec4 lighting = vec4(directional_shade + ambient, 1);
+    directional_shade = directional_shade.r > 0.5 ? vec3(1) : vec3(0);
+
+    vec4 lighting = vec4(directional_shade, 1);
 
     return tex * lighting;
 }
 
 void main() {
     // FragColor = with_shadows(texture(sector_t, _uv));
-    FragColor = texture(sector_t, _uv);
+    FragColor = with_shadows(vec4(1, 0, 0, 1));
+    // FragColor = texture(shadow_t, _uv);
 }

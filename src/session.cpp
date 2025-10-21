@@ -9,6 +9,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "external/stb_image.h"
 
+int SHADOW_SIZE = 4096;
+
 GLuint buffer;
 GLuint buffer_sector;
 GLuint buffer_texture;
@@ -16,7 +18,7 @@ GLuint buffer_depth;
 GLuint buffer2;
 GLuint buffer2_color;
 
-vec3 LIGHT_DIR(0, -1, 0);
+vec3 LIGHT_DIR(1, -1, -1);
 mat4 LIGHT_SPACE;
 
 #define uloc(name) glGetUniformLocation(s.ID, name)
@@ -47,6 +49,7 @@ Session::Session() {
             glEnableVertexAttribArray(0);
         },
         [](Shader &s, Session &se) {
+            glViewport(0, 0, SHADOW_SIZE, SHADOW_SIZE);
             glBindFramebuffer(GL_FRAMEBUFFER, buffer);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -77,9 +80,12 @@ Session::Session() {
             se.bookshelf.position = vec3(-0.5, 0, -0.25);
             se.bookshelf.draw(s.ID);
 
+            se.ground.draw(s.ID);
+
             // se.room.position.z = 0.1;
             // se.room.draw(s.ID);
 
+            glViewport(0, 0, SCREEN_W, SCREEN_H);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         });
 
@@ -139,6 +145,8 @@ Session::Session() {
 
             se.bookshelf.position = vec3(-0.5, 0, -0.25);
             se.bookshelf.draw(s.ID);
+
+            se.ground.draw(s.ID);
 
             // se.room.position.z = 0.1;
             // se.room.draw(s.ID);
@@ -217,6 +225,7 @@ void Session::load_objects() {
     desk = MeshStatic::from_scene("assets/desk.obj");
     bookshelf = MeshStatic::from_scene("assets/bookshelf.obj");
     room = MeshStatic::from_scene("assets/room.obj");
+    ground = MeshStatic::from_scene("assets/ground.obj");
 }
 
 void Session::generate_buffers() {
@@ -243,8 +252,8 @@ void Session::generate_buffers() {
 
     glGenTextures(1, &buffer_depth);
     glBindTexture(GL_TEXTURE_2D, buffer_depth);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, SCREEN_W, SCREEN_H, 0, GL_DEPTH_COMPONENT,
-                 GL_FLOAT, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, SHADOW_SIZE, SHADOW_SIZE, 0,
+                 GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -262,9 +271,9 @@ void Session::generate_buffers() {
 }
 
 void update_light_space() {
-    const float OFFSET = 16;
-    const float NEAR = 0.1;
-    const float FAR = OFFSET * 4;
+    const float OFFSET = 80;
+    const float NEAR = 1;
+    const float FAR = 400;
 
     mat4 light_view = lookAt(-LIGHT_DIR * OFFSET, vec3(0, 0, 0), vec3(0, 1, 0));
 
