@@ -50,10 +50,10 @@ void main() {
 
     vec3 final = texture(texture_t, _uv).rgb;
 
-    float avg = (final.r + final.g + final.b) / 3;
+    float avg = (final.r + final.g + final.b) / 3.0;
 
     if (avg < 0.1) {
-        FragColor = vec4(mix(BLACK, final * 8, edge), 1);
+        FragColor = vec4(mix(BLACK, final * 4, edge), 1);
     } else {
         FragColor = vec4(mix(final, BLACK, edge), 1);
     }

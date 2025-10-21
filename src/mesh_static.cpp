@@ -1,9 +1,10 @@
+#include "color.hpp"
+#include "pch.hpp"
+
 #include "mesh_static.hpp"
 
 #include "base.hpp"
-#include "pch.hpp"
 #include "random.hpp"
-#include <SDL3/SDL_stdinc.h>
 
 static std::random_device rd;
 static std::mt19937 gen(rd());
@@ -78,6 +79,8 @@ MeshStatic MeshStatic::from_scene(std::string file) {
         }
     }
 
+    m.color = random_color();
+
     assert(m.verts.size() > 0);
     assert(m.indices.size() > 0);
 
@@ -87,6 +90,9 @@ MeshStatic MeshStatic::from_scene(std::string file) {
 void MeshStatic::draw(u32 shader_id) {
     gl_buffer_data();
     gl_uniforms(shader_id);
+
+    glUniform3f(glGetUniformLocation(shader_id, "color"), color.r, color.g, color.b);
+
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, 0);
 }
 

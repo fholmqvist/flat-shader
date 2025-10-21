@@ -5,6 +5,7 @@
 struct MeshStatic {
     std::vector<Vertex> verts;
     std::vector<u16> indices;
+    vec3 color = vec3(1);
 
     // TODO: These should be in model.
     vec3 position = vec3(0);
