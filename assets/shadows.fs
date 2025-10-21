@@ -24,7 +24,12 @@ float shadow_calculation(vec4 light_space, vec3 dir_light) {
 
     float closest = texture(shadow_t, coords.xy).r;
     float curr = coords.z;
-    float bias = max(0.005 * (1 - dot(_normal, dir_light)), 0.0005);
+
+    // float bias = max(0.005 * (1 - dot(_normal, dir_light)), 0.0005);
+
+    float cos_t = max(dot(_normal, dir_light), 0);
+    float slope_bias = (1 - cos_t) * 0.00005;
+    float bias = 0.0005 + slope_bias;
 
     float shadow = curr - bias > closest ? 1 : 0;
     if (coords.x < 0 || coords.x > 1 ||
