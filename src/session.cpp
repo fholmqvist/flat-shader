@@ -368,7 +368,7 @@ void Session::generate_buffers() {
 }
 
 void update_light_space() {
-    const float OFFSET = 4;
+    const float OFFSET = 2;
     const float NEAR = 0.1;
     const float FAR = OFFSET * 4;
 
