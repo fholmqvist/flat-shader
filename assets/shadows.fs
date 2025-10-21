@@ -63,7 +63,7 @@ vec3 with_shadows(vec3 tex) {
 
     vec3 shade = tex * directional_shade;
     float avg = (shade.r + shade.g + shade.b) / 3;
-    return avg > 0.25 ? tex : mix(tex, BLACK, 0.9);
+    return avg > 0.24 ? tex : mix(tex, BLACK, 0.9);
 }
 
 void main() {
