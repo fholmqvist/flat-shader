@@ -11,6 +11,7 @@ layout (location = 0) out vec3 sector_out;
 layout (location = 1) out vec3 texture_out;
 
 uniform vec3 light_dir;
+uniform vec2 texel_size;
 
 uniform vec3 color;
 
@@ -31,7 +32,18 @@ float shadow_calculation(vec4 light_space, vec3 dir_light) {
     float slope_bias = (1 - cos_t) * 0.00005;
     float bias = 0.0005 + slope_bias;
 
+    // float shadow = 0.0;
+    // int samples = 0;
+    // for (int x = -2; x <= 2; ++x)
+    // for (int y = -2; y <= 2; ++y) {
+    //     float pcfDepth = texture(shadow_t, coords.xy + vec2(x, y) * texel_size).r;
+    //     shadow += (curr - bias > pcfDepth) ? 1.0 : 0.0;
+    //     samples++;
+    // }
+    // shadow /= samples;
+
     float shadow = curr - bias > closest ? 1 : 0;
+
     if (coords.x < 0 || coords.x > 1 ||
         coords.y < 0 || coords.y > 1 ||
         coords.z < 0 || coords.z > 1) {

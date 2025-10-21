@@ -3,7 +3,7 @@
 
 #include "light.hpp"
 
-int SHADOW_SIZE = 4096;
+int SHADOW_SIZE = 4096 * 2;
 
 vec3 LIGHT_DIR = vec3(0.25, -1, 1);
 mat4 LIGHT_SPACE;
@@ -28,7 +28,7 @@ std::vector<vec3> get_camera_frustum_corners(mat4 proj, mat4 view) {
 }
 
 void update_light_space(Camera &camera) {
-    const float FRUSTUM_SIZE = 3;
+    const float FRUSTUM_SIZE = 5;
     const float NEAR = -16;
     const float FAR = 16;
 
