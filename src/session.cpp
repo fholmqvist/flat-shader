@@ -14,11 +14,13 @@ int SHADOW_SIZE = 4096;
 GLuint shadow_fbo;
 GLuint shadow_depth;
 
-GLuint buffer;
-GLuint buffer_sector;
-GLuint buffer_texture;
-GLuint buffer2;
-GLuint buffer2_color;
+GLuint color_fbo;
+GLuint color_depth;
+GLuint color_sector;
+GLuint color_texture;
+
+GLuint final_fbo;
+GLuint final_color;
 
 vec3 LIGHT_DIR(0.25, -1, -1);
 mat4 LIGHT_SPACE;
@@ -53,7 +55,7 @@ Session::Session() {
         [](Shader &s, Session &se) {
             glViewport(0, 0, SHADOW_SIZE, SHADOW_SIZE);
             glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
-            glClear(GL_DEPTH_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             update_light_space();
             glUniformMatrix4fv(uloc("light_space"), 1, GL_FALSE, &LIGHT_SPACE[0][0]);
@@ -103,9 +105,13 @@ Session::Session() {
             glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                                   (void*)(offsetof(Vertex, uv)));
             glEnableVertexAttribArray(2);
+
+            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                                  (void*)(offsetof(Vertex, sector_color)));
+            glEnableVertexAttribArray(3);
         },
         [](Shader &s, Session &se) {
-            // glBindFramebuffer(GL_FRAMEBUFFER, buffer2);
+            glBindFramebuffer(GL_FRAMEBUFFER, color_fbo);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glUniformMatrix4fv(uloc("view_projection"), 1, GL_FALSE,
@@ -115,12 +121,8 @@ Session::Session() {
             glUniform3fv(uloc("light_dir"), 1, &LIGHT_DIR[0]);
 
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, buffer_sector);
-            glUniform1i(glGetUniformLocation(s.ID, "sector_t"), 0);
-
-            glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, shadow_depth);
-            glUniform1i(glGetUniformLocation(s.ID, "shadow_t"), 1);
+            glUniform1i(glGetUniformLocation(s.ID, "shadow_t"), 0);
 
             se.sofa.position = vec3(-0.2, 0, 0);
             se.sofa.rotation.y = DEG2RAD(0);
@@ -149,7 +151,7 @@ Session::Session() {
             se.room.position.z = 0.1;
             se.room.draw(s.ID);
 
-            // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
         });
 
     fxaa = Shader(
@@ -171,7 +173,7 @@ Session::Session() {
         },
         [](Shader &s, Session &) {
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, buffer2_color);
+            glBindTexture(GL_TEXTURE_2D, color_texture);
             glUniform1i(uloc("input_t"), 0);
 
             glUniform2f(uloc("texel_size"), 1.0f / SCREEN_W, 1.0f / SCREEN_H);
@@ -205,7 +207,7 @@ void Session::render() {
     depth.render(*this);
     shadows.render(*this);
 
-    // fxaa.render(*this);
+    fxaa.render(*this);
 
     window.swap();
 }
@@ -249,29 +251,34 @@ void Session::generate_buffers() {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    glGenFramebuffers(1, &buffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, buffer);
+    glGenFramebuffers(1, &color_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, color_fbo);
 
-    glGenTextures(1, &buffer_sector);
-    glBindTexture(GL_TEXTURE_2D, buffer_sector);
+    glGenRenderbuffers(1, &color_depth);
+    glBindRenderbuffer(GL_RENDERBUFFER, color_depth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, SCREEN_W, SCREEN_H);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, color_depth);
+
+    glGenTextures(1, &color_sector);
+    glBindTexture(GL_TEXTURE_2D, color_sector);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, buffer_sector, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_sector, 0);
 
-    glGenTextures(1, &buffer_texture);
-    glBindTexture(GL_TEXTURE_2D, buffer_texture);
+    glGenTextures(1, &color_texture);
+    glBindTexture(GL_TEXTURE_2D, color_texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, buffer_texture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, color_texture, 0);
 
-    GLenum attachments[1] = { GL_COLOR_ATTACHMENT0 };
-    glDrawBuffers(1, attachments);
+    GLenum attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+    glDrawBuffers(2, attachments);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         log_dang("Framebuffer not complete");
