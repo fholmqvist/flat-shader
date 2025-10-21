@@ -3,13 +3,12 @@
 #include "session.hpp"
 
 #include "base.hpp"
+#include "light.hpp"
 #include "shader.hpp"
 #include "window.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "external/stb_image.h"
-
-int SHADOW_SIZE = 4096;
 
 GLuint shadow_fbo;
 GLuint shadow_depth;
@@ -23,12 +22,7 @@ GLuint lines_fbo;
 GLuint lines_depth;
 GLuint lines_texture;
 
-vec3 LIGHT_DIR = vec3(0.25, -1, 1);
-mat4 LIGHT_SPACE;
-
 #define uloc(name) glGetUniformLocation(s.ID, name)
-
-void update_light_space();
 
 Session::Session() {
     log_info("Starting");
@@ -58,7 +52,7 @@ Session::Session() {
             glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            update_light_space();
+            update_light_space(se.camera);
             glUniformMatrix4fv(uloc("light_space"), 1, GL_FALSE, &LIGHT_SPACE[0][0]);
 
             se.sofa.position = vec3(-0.2, 0, 0);
@@ -365,16 +359,4 @@ void Session::generate_buffers() {
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
-}
-
-void update_light_space() {
-    const float OFFSET = 2;
-    const float NEAR = 0.1;
-    const float FAR = OFFSET * 4;
-
-    mat4 light_view = lookAt(-LIGHT_DIR * OFFSET, vec3(0, 0, 0), vec3(0, 1, 0));
-
-    mat4 light_projection = ortho(-OFFSET, OFFSET, -OFFSET, OFFSET, NEAR, FAR);
-
-    LIGHT_SPACE = light_projection * light_view;
 }

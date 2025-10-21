@@ -1,22 +1,10 @@
 #pragma once
 
-#define LIGHT_COLOR_DEFAULT vec3(1, 0.8, 0.5)
+struct Camera;
 
-struct LightDirectional {
-    float intensity = 1;
-    vec3 dir;
-    vec3 color = LIGHT_COLOR_DEFAULT;
-};
+extern int SHADOW_SIZE;
 
-struct LightPoint {
-    float intensity = 1;
-    vec3 pos;
-    vec3 color = LIGHT_COLOR_DEFAULT;
+extern vec3 LIGHT_DIR;
+extern mat4 LIGHT_SPACE;
 
-    int distance;
-    float constant = 1;
-    float linear = 0.09;
-    float quadratic = 0.032;
-
-    LightPoint(int _distance);
-};
+void update_light_space(Camera &);
