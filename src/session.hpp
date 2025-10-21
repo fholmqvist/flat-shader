@@ -24,12 +24,10 @@ struct Session {
     MeshStatic bookshelf;
     MeshStatic room;
 
-    // Shader geo;
-    // Shader lines;
 
     Shader depth;
     Shader shadows;
-
+    Shader lines;
     Shader fxaa;
 
     Session();

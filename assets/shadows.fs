@@ -47,6 +47,7 @@ vec3 with_shadows(vec3 tex) {
 
 void main() {
     // FragColor = with_shadows(texture(sector_t, _uv));
-    texture_out = with_shadows(_sector_color);
+    sector_out = with_shadows(_sector_color);
+    texture_out = with_shadows(vec3(1));
     // FragColor = texture(shadow_t, _uv);
 }

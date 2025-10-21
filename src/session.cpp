@@ -19,8 +19,9 @@ GLuint color_depth;
 GLuint color_sector;
 GLuint color_texture;
 
-GLuint final_fbo;
-GLuint final_color;
+GLuint lines_fbo;
+GLuint lines_depth;
+GLuint lines_texture;
 
 vec3 LIGHT_DIR(0.25, -1, -1);
 mat4 LIGHT_SPACE;
@@ -154,8 +155,48 @@ Session::Session() {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         });
 
+    lines = Shader(
+        "assets/lines.vs", "assets/lines.fs",
+        [](Shader &) {
+            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+            glEnableVertexAttribArray(0);
+
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
+                                  (void*)(2 * sizeof(float)));
+            glEnableVertexAttribArray(1);
+
+            float quad_verts[] = { -1, 1, 0, 1, -1, -1, 0, 0, 1, -1, 1, 0,
+                                   -1, 1, 0, 1, 1,  -1, 1, 0, 1, 1,  1, 1 };
+
+            glBufferData(GL_ARRAY_BUFFER, sizeof(quad_verts), quad_verts, GL_STATIC_DRAW);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        },
+        [](Shader &s, Session &) {
+            glBindFramebuffer(GL_FRAMEBUFFER, lines_fbo);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, color_sector);
+            glUniform1i(uloc("sector_t"), 0);
+
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, color_texture);
+            glUniform1i(uloc("texture_t"), 1);
+
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, color_depth);
+            glUniform1i(uloc("depth_t"), 2);
+
+            glUniform2f(uloc("texel_size"), 1.0f / SCREEN_W, 1.0f / SCREEN_H);
+
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        });
+
     fxaa = Shader(
-        "assets/final.vs", "assets/fxaa.fs",
+        "assets/lines.vs", "assets/fxaa.fs",
         [](Shader &) {
             glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
             glEnableVertexAttribArray(0);
@@ -173,7 +214,7 @@ Session::Session() {
         },
         [](Shader &s, Session &) {
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, color_texture);
+            glBindTexture(GL_TEXTURE_2D, lines_texture);
             glUniform1i(uloc("input_t"), 0);
 
             glUniform2f(uloc("texel_size"), 1.0f / SCREEN_W, 1.0f / SCREEN_H);
@@ -181,12 +222,9 @@ Session::Session() {
             glDrawArrays(GL_TRIANGLES, 0, 6);
         });
 
-    // geo.init();
-    // lines.init();
-
     depth.init();
     shadows.init();
-
+    lines.init();
     fxaa.init();
 
     log_info("Started in %s (total)", time_to_string(timer.stop()).c_str());
@@ -201,12 +239,9 @@ void Session::update() {
 void Session::render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // geo.render(*this);
-    // lines.render(*this);
-
     depth.render(*this);
     shadows.render(*this);
-
+    lines.render(*this);
     fxaa.render(*this);
 
     window.swap();
@@ -228,63 +263,104 @@ void Session::load_objects() {
 }
 
 void Session::generate_buffers() {
-    glGenFramebuffers(1, &shadow_fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
+    {
+        glGenFramebuffers(1, &shadow_fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
 
-    glGenTextures(1, &shadow_depth);
-    glBindTexture(GL_TEXTURE_2D, shadow_depth);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, SHADOW_SIZE, SHADOW_SIZE, 0,
-                 GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadow_depth, 0);
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
+        glGenTextures(1, &shadow_depth);
+        glBindTexture(GL_TEXTURE_2D, shadow_depth);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, SHADOW_SIZE, SHADOW_SIZE, 0,
+                     GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadow_depth, 0);
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
 
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        log_dang("Shadow framebuffer not complete");
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            log_dang("Shadow framebuffer not complete");
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    {
+        glGenFramebuffers(1, &color_fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, color_fbo);
 
-    glGenFramebuffers(1, &color_fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, color_fbo);
+        glGenTextures(1, &color_depth);
+        glBindTexture(GL_TEXTURE_2D, color_depth);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, SCREEN_W, SCREEN_H, 0,
+                     GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, color_depth, 0);
 
-    glGenRenderbuffers(1, &color_depth);
-    glBindRenderbuffer(GL_RENDERBUFFER, color_depth);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, SCREEN_W, SCREEN_H);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, color_depth);
+        glGenTextures(1, &color_sector);
+        glBindTexture(GL_TEXTURE_2D, color_sector);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_sector,
+                               0);
 
-    glGenTextures(1, &color_sector);
-    glBindTexture(GL_TEXTURE_2D, color_sector);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_sector, 0);
+        glGenTextures(1, &color_texture);
+        glBindTexture(GL_TEXTURE_2D, color_texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, color_texture,
+                               0);
 
-    glGenTextures(1, &color_texture);
-    glBindTexture(GL_TEXTURE_2D, color_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, color_texture, 0);
+        GLenum attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+        glDrawBuffers(2, attachments);
 
-    GLenum attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-    glDrawBuffers(2, attachments);
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            log_dang("Framebuffer not complete");
+        }
 
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        log_dang("Framebuffer not complete");
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    {
+        glGenFramebuffers(1, &lines_fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, lines_fbo);
+
+        glGenRenderbuffers(1, &lines_depth);
+        glBindRenderbuffer(GL_RENDERBUFFER, lines_depth);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, SCREEN_W, SCREEN_H);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
+                                  lines_depth);
+
+        glGenTextures(1, &lines_texture);
+        glBindTexture(GL_TEXTURE_2D, lines_texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, lines_texture,
+                               0);
+
+        GLenum attachments[1] = { GL_COLOR_ATTACHMENT0 };
+        glDrawBuffers(1, attachments);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            log_dang("Framebuffer not complete");
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
 }
 
 void update_light_space() {
@@ -298,121 +374,3 @@ void update_light_space() {
 
     LIGHT_SPACE = light_projection * light_view;
 }
-
-/*
-
-geo = Shader(
-        "assets/sector.vs", "assets/sector.fs",
-        [](Shader &) {
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                                  (void*)(offsetof(Vertex, pos)));
-            glEnableVertexAttribArray(0);
-
-            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                                  (void*)(offsetof(Vertex, normal)));
-            glEnableVertexAttribArray(1);
-
-            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                                  (void*)(offsetof(Vertex, uv)));
-            glEnableVertexAttribArray(2);
-
-            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                                  (void*)(offsetof(Vertex, sector_color)));
-            glEnableVertexAttribArray(3);
-        },
-        [](Shader &s, Session &se) {
-            glBindFramebuffer(GL_FRAMEBUFFER, buffer);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            glUniformMatrix4fv(uloc("view_projection"), 1, GL_FALSE,
-                               value_ptr(se.camera.perspective() * se.camera.view_matrix()));
-            glUniform3f(uloc("view_pos"), se.camera.pos.x, se.camera.pos.y, se.camera.pos.z);
-
-            glUniform1f(uloc("dir_light.intensity"), 1);
-            glUniform3f(uloc("dir_light.dir"), 0, -1, -1);
-
-            glUniform3f(uloc("color"), 0.99, 0.67, 0.12);
-
-            se.sofa.position = vec3(-0.2, 0, 0);
-            se.sofa.rotation.y = DEG2RAD(0);
-            se.sofa.draw(s.ID);
-            se.sofa.position = vec3(0.2, 0, 0);
-            se.sofa.rotation.y = DEG2RAD(180);
-            se.sofa.draw(s.ID);
-
-            se.table.draw(s.ID);
-
-            se.chair.position = vec3(0, 0, -0.5);
-            se.chair.rotation.y = DEG2RAD(-90);
-            se.chair.draw(s.ID);
-
-            se.chair.position = vec3(0, 0, 0.3);
-            se.chair.rotation.y = DEG2RAD(90);
-            se.chair.draw(s.ID);
-
-            se.desk.position = vec3(0, 0, -0.35);
-            se.desk.rotation.y = DEG2RAD(-90);
-            se.desk.draw(s.ID);
-
-            se.bookshelf.position = vec3(-0.5, 0, -0.25);
-            se.bookshelf.draw(s.ID);
-
-            se.room.position.z = 0.1;
-            se.room.draw(s.ID);
-
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        });
-
-lines = Shader(
-        "assets/final.vs", "assets/final.fs",
-        [](Shader &) {
-            glGenFramebuffers(1, &buffer2);
-            glBindFramebuffer(GL_FRAMEBUFFER, buffer2);
-
-            glGenTextures(1, &buffer2_color);
-            glBindTexture(GL_TEXTURE_2D, buffer2_color);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_UNSIGNED_BYTE,
-                         nullptr);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                                   buffer2_color, 0);
-
-            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-            glEnableVertexAttribArray(0);
-
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
-                                  (void*)(2 * sizeof(float)));
-            glEnableVertexAttribArray(1);
-
-            float quad_verts[] = { -1, 1, 0, 1, -1, -1, 0, 0, 1, -1, 1, 0,
-                                   -1, 1, 0, 1, 1,  -1, 1, 0, 1, 1,  1, 1 };
-
-            glBufferData(GL_ARRAY_BUFFER, sizeof(quad_verts), quad_verts, GL_STATIC_DRAW);
-
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        },
-        [](Shader &s, Session &) {
-            glBindFramebuffer(GL_FRAMEBUFFER, buffer2);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, buffer_sector);
-            glUniform1i(uloc("sector_t"), 0);
-
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, buffer_texture);
-            glUniform1i(uloc("texture_t"), 1);
-
-            glActiveTexture(GL_TEXTURE2);
-            glBindTexture(GL_TEXTURE_2D, buffer_depth);
-            glUniform1i(uloc("depth_t"), 2);
-
-            glUniform2f(uloc("texel_size"), 1.0f / SCREEN_W, 1.0f / SCREEN_H);
-
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        });
-
-*/
