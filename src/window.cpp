@@ -49,6 +49,8 @@ bool Window::init() {
 
     glClearColor(0, 0, 0, 1);
 
+    // SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+
     // VSYNC.
     SDL_GL_SetSwapInterval(0);
 
