@@ -40,7 +40,7 @@ Session::Session() {
 
     generate_buffers();
 
-    camera.pos = { 0.7, 1.1, 1.2 };
+    camera.pos = { 1, 1.5, 1.8 };
     camera.rot = { -120, -30 };
 
     depth = Shader(
@@ -199,28 +199,28 @@ void Session::render() {
 void Session::draw_objects(u32 shader_id) {
     for (int z = 0; z < 1; z++) {
         for (int x = 0; x < 1; x++) {
-            sofa.position = vec3(-0.2 + x, 0, 0 + z);
+            sofa.position = vec3(-0.5 + x, 0, 0 + z);
             sofa.rotation.y = DEG2RAD(0);
             sofa.draw(shader_id);
-            sofa.position = vec3(0.2 + x, 0, 0 + z);
+            sofa.position = vec3(0.5 + x, 0, 0 + z);
             sofa.rotation.y = DEG2RAD(180);
             sofa.draw(shader_id);
 
             table.draw(shader_id);
 
-            chair.position = vec3(0 + x, 0, -0.5 + z);
+            chair.position = vec3(0 + x, 0, -1 + z);
             chair.rotation.y = DEG2RAD(-90);
             chair.draw(shader_id);
 
-            chair.position = vec3(0 + x, 0, 0.3 + z);
+            chair.position = vec3(0 + x, 0, 0.6 + z);
             chair.rotation.y = DEG2RAD(90);
             chair.draw(shader_id);
 
-            desk.position = vec3(0 + x, 0, -0.35 + z);
+            desk.position = vec3(0 + x, 0, -0.7 + z);
             desk.rotation.y = DEG2RAD(-90);
             desk.draw(shader_id);
 
-            bookshelf.position = vec3(-0.5 + x, 0, -0.25 + z);
+            bookshelf.position = vec3(-1 + x, 0, -0.5 + z);
             bookshelf.draw(shader_id);
 
             room.position.x = 0 + x;
