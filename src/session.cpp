@@ -197,7 +197,7 @@ void Session::render() {
 }
 
 void Session::draw_objects(u32 shader_id) {
-    if (false) {
+    if (true) {
         sofa.position = vec3(-0.5, 0, 0);
         sofa.rotation.y = DEG2RAD(0);
         sofa.draw(shader_id);
@@ -227,23 +227,25 @@ void Session::draw_objects(u32 shader_id) {
         room.draw(shader_id);
     }
 
-    pipe.position = vec3(0);
+    const float y = 0.5;
+
+    pipe.position = vec3(0, y, 0);
     pipe.draw(shader_id);
 
-    pipe_right.position = vec3(0, 0, -1);
+    pipe_right.position = vec3(0, y, -1);
     pipe_right.rotation.y = DEG2RAD(0);
     pipe_right.draw(shader_id);
-    pipe_right.position = vec3(1, 0, -1);
+    pipe_right.position = vec3(1, y, -1);
     pipe_right.rotation.y = DEG2RAD(180);
     pipe_right.draw(shader_id);
 
-    pipe.position = vec3(1, 0, -2);
+    pipe.position = vec3(1, y, -2);
     pipe.draw(shader_id);
 
-    pipe_down.position = vec3(1, 0, -3);
+    pipe_down.position = vec3(1, y, -3);
     pipe_down.rotation.y = DEG2RAD(0);
     pipe_down.draw(shader_id);
-    pipe_down.position = vec3(0, 0, 1);
+    pipe_down.position = vec3(0, y, 1);
     pipe_down.rotation.y = DEG2RAD(180);
     pipe_down.draw(shader_id);
 }
