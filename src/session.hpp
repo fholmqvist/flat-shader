@@ -24,6 +24,9 @@ struct Session {
     MeshStatic bookshelf;
     MeshStatic room;
 
+    MeshStatic pipe;
+    MeshStatic pipe_down;
+    MeshStatic pipe_right;
 
     Shader depth;
     Shader shadows;
