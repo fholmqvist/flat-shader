@@ -40,8 +40,8 @@ Session::Session() {
 
     generate_buffers();
 
-    camera.pos = { 1, 1.5, 1.8 };
-    camera.rot = { -120, -30 };
+    camera.pos = { 2.7, 1.5, 2.7 };
+    camera.rot = { -135, -19 };
 
     depth = Shader(
         "assets/depth.vs", "assets/depth.fs",
@@ -197,56 +197,61 @@ void Session::render() {
 }
 
 void Session::draw_objects(u32 shader_id) {
-    if (true) {
-        sofa.position = vec3(-0.5, 0, 0);
-        sofa.rotation.y = DEG2RAD(0);
-        sofa.draw(shader_id);
-        sofa.position = vec3(0.5, 0, 0);
-        sofa.rotation.y = DEG2RAD(180);
-        sofa.draw(shader_id);
+    sofa.position = vec3(-0.5, 0, 0);
+    sofa.rotation.y = DEG2RAD(0);
+    sofa.draw(shader_id);
+    sofa.position = vec3(0.5, 0, 0);
+    sofa.rotation.y = DEG2RAD(180);
+    sofa.draw(shader_id);
 
-        table.draw(shader_id);
+    table.draw(shader_id);
 
-        chair.position = vec3(0, 0, -1);
-        chair.rotation.y = DEG2RAD(-90);
-        chair.draw(shader_id);
+    chair.position = vec3(0, 0, -1);
+    chair.rotation.y = DEG2RAD(-90);
+    chair.draw(shader_id);
 
-        chair.position = vec3(0, 0, 0.6);
-        chair.rotation.y = DEG2RAD(90);
-        chair.draw(shader_id);
+    chair.position = vec3(0, 0, 0.6);
+    chair.rotation.y = DEG2RAD(90);
+    chair.draw(shader_id);
 
-        desk.position = vec3(0, 0, -0.7);
-        desk.rotation.y = DEG2RAD(-90);
-        desk.draw(shader_id);
+    desk.position = vec3(0, 0, -0.7);
+    desk.rotation.y = DEG2RAD(-90);
+    desk.draw(shader_id);
 
-        bookshelf.position = vec3(-1, 0, -0.5);
-        bookshelf.draw(shader_id);
+    bookshelf.position = vec3(-1, 0, -0.5);
+    bookshelf.draw(shader_id);
 
-        room.position.x = 0;
-        room.position.z = 0.1;
-        room.draw(shader_id);
-    }
+    room.position.x = 0;
+    room.position.z = 0.1;
+    room.draw(shader_id);
 
     const float y = 0.5;
 
-    pipe.position = vec3(0, y, 0);
+    pipe.rotation.y = DEG2RAD(90);
+    pipe.position = vec3(-1, y, 2);
+    pipe.draw(shader_id);
+    pipe.position = vec3(0, y, 2);
+    pipe.draw(shader_id);
+    pipe.position = vec3(1, y, 2);
     pipe.draw(shader_id);
 
-    pipe_right.position = vec3(0, y, -1);
-    pipe_right.rotation.y = DEG2RAD(0);
-    pipe_right.draw(shader_id);
-    pipe_right.position = vec3(1, y, -1);
+    pipe.rotation.y = DEG2RAD(0);
+    pipe.position = vec3(2, y, 1);
+    pipe.draw(shader_id);
+    pipe.position = vec3(2, y, 0);
+    pipe.draw(shader_id);
+    pipe.position = vec3(2, y, -1);
+    pipe.draw(shader_id);
+
+    pipe_right.position = vec3(2, y, 2);
     pipe_right.rotation.y = DEG2RAD(180);
     pipe_right.draw(shader_id);
 
-    pipe.position = vec3(1, y, -2);
-    pipe.draw(shader_id);
-
-    pipe_down.position = vec3(1, y, -3);
-    pipe_down.rotation.y = DEG2RAD(0);
+    pipe_down.position = vec3(-2, y, 2);
+    pipe_down.rotation.y = DEG2RAD(90);
     pipe_down.draw(shader_id);
-    pipe_down.position = vec3(0, y, 1);
-    pipe_down.rotation.y = DEG2RAD(180);
+    pipe_down.position = vec3(2, y, -2);
+    pipe_down.rotation.y = DEG2RAD(0);
     pipe_down.draw(shader_id);
 }
 
