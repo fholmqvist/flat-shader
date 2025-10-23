@@ -40,8 +40,8 @@ Session::Session() {
 
     generate_buffers();
 
-    camera.pos = { 2.7, 1.5, 2.7 };
-    camera.rot = { -135, -19 };
+    camera.pos = { 2.4, 5.7, 2.7 };
+    camera.rot = { 225, -60 };
 
     depth = Shader(
         "assets/depth.vs", "assets/depth.fs",
