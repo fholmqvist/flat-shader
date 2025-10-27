@@ -21,8 +21,6 @@ GLuint lines_texture;
 
 #define uloc(name) glGetUniformLocation(s.ID, name)
 
-void set_random_color();
-
 Session::Session() {
     log_info("Starting");
 
@@ -199,10 +197,31 @@ void Session::render() {
 }
 
 void Session::draw_objects(u32 shader_id) {
-    monorail.position.x = 0;
+    monorail.position.z = 0;
     monorail.draw(shader_id);
-    monorail.position.x = 1;
+    monorail.position.z = 2.2;
     monorail.draw(shader_id);
+    monorail.position.z = 4.4;
+    monorail.draw(shader_id);
+    monorail.position.z = 6.6;
+    monorail.draw(shader_id);
+    monorail.position.z = 8.8;
+    monorail.draw(shader_id);
+
+    rail.position.z = -2;
+    rail.draw(shader_id);
+    rail.position.z = 0;
+    rail.draw(shader_id);
+    rail.position.z = 2;
+    rail.draw(shader_id);
+    rail.position.z = 4;
+    rail.draw(shader_id);
+    rail.position.z = 6;
+    rail.draw(shader_id);
+    rail.position.z = 8;
+    rail.draw(shader_id);
+    rail.position.z = 10;
+    rail.draw(shader_id);
     // sofa.position = vec3(-0.5, 0, 0);
     // sofa.rotation.y = DEG2RAD(0);
     // sofa.draw(shader_id);
@@ -278,6 +297,7 @@ void Session::load_objects() {
     // pipe_down = MeshStatic::from_scene("assets/pipe_down.obj", palette[0]);
     // pipe_right = MeshStatic::from_scene("assets/pipe_right.obj", palette[0]);
     monorail = MeshStatic::from_scene("assets/monorail.obj");
+    rail = MeshStatic::from_scene("assets/rail.obj");
 }
 
 void Session::generate_buffers() {

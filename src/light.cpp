@@ -28,7 +28,7 @@ std::vector<vec3> get_camera_frustum_corners(mat4 proj, mat4 view) {
 }
 
 void update_light_space(Camera &camera) {
-    const float FRUSTUM_SIZE = 5;
+    const float FRUSTUM_SIZE = 16;
     const float NEAR = -16;
     const float FAR = 16;
 
