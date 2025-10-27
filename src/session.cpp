@@ -7,9 +7,6 @@
 #include "shader.hpp"
 #include "window.hpp"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "external/stb_image.h"
-
 GLuint shadow_fbo;
 GLuint shadow_depth;
 
@@ -38,6 +35,8 @@ Session::Session() {
     load_objects();
 
     generate_buffers();
+
+    textures.add("palette", "assets/antiquity16.png", GL_RGB);
 
     camera.pos = { 2.4, 5.7, 2.7 };
     camera.rot = { 225, -60 };
@@ -95,6 +94,10 @@ Session::Session() {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, shadow_depth);
             glUniform1i(glGetUniformLocation(s.ID, "shadow_t"), 0);
+
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, se.textures.get("palette").id);
+            glUniform1i(glGetUniformLocation(s.ID, "palette_t"), 1);
 
             se.draw_objects(s.ID);
 

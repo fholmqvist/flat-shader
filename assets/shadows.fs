@@ -13,9 +13,8 @@ layout (location = 1) out vec3 texture_out;
 uniform vec3 light_dir;
 uniform vec2 texel_size;
 
-uniform vec3 color;
-
 uniform sampler2D shadow_t;
+uniform sampler2D palette_t;
 
 const vec3 BLACK = vec3(0);
 
@@ -68,5 +67,5 @@ vec3 with_shadows(vec3 tex) {
 
 void main() {
     sector_out  = _sector_color;
-    texture_out = with_shadows(color);
+    texture_out = with_shadows(texture(palette_t, _uv).rgb);
 }
