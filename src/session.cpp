@@ -1,4 +1,3 @@
-#include "color.hpp"
 #include "pch.hpp"
 
 #include "session.hpp"
@@ -197,62 +196,63 @@ void Session::render() {
 }
 
 void Session::draw_objects(u32 shader_id) {
-    sofa.position = vec3(-0.5, 0, 0);
-    sofa.rotation.y = DEG2RAD(0);
-    sofa.draw(shader_id);
-    sofa.position = vec3(0.5, 0, 0);
-    sofa.rotation.y = DEG2RAD(180);
-    sofa.draw(shader_id);
+    monorail.draw(shader_id);
+    // sofa.position = vec3(-0.5, 0, 0);
+    // sofa.rotation.y = DEG2RAD(0);
+    // sofa.draw(shader_id);
+    // sofa.position = vec3(0.5, 0, 0);
+    // sofa.rotation.y = DEG2RAD(180);
+    // sofa.draw(shader_id);
 
-    table.draw(shader_id);
+    // table.draw(shader_id);
 
-    chair.position = vec3(0, 0, -1);
-    chair.rotation.y = DEG2RAD(-90);
-    chair.draw(shader_id);
+    // chair.position = vec3(0, 0, -1);
+    // chair.rotation.y = DEG2RAD(-90);
+    // chair.draw(shader_id);
 
-    chair.position = vec3(0, 0, 0.6);
-    chair.rotation.y = DEG2RAD(90);
-    chair.draw(shader_id);
+    // chair.position = vec3(0, 0, 0.6);
+    // chair.rotation.y = DEG2RAD(90);
+    // chair.draw(shader_id);
 
-    desk.position = vec3(0, 0, -0.7);
-    desk.rotation.y = DEG2RAD(-90);
-    desk.draw(shader_id);
+    // desk.position = vec3(0, 0, -0.7);
+    // desk.rotation.y = DEG2RAD(-90);
+    // desk.draw(shader_id);
 
-    bookshelf.position = vec3(-1, 0, -0.5);
-    bookshelf.draw(shader_id);
+    // bookshelf.position = vec3(-1, 0, -0.5);
+    // bookshelf.draw(shader_id);
 
-    room.position.x = 0;
-    room.position.z = 0.1;
-    room.draw(shader_id);
+    // room.position.x = 0;
+    // room.position.z = 0.1;
+    // room.draw(shader_id);
 
-    const float y = 0.5;
+    // const float y = 0.5;
 
-    pipe.rotation.y = DEG2RAD(90);
-    pipe.position = vec3(-1, y, 2);
-    pipe.draw(shader_id);
-    pipe.position = vec3(0, y, 2);
-    pipe.draw(shader_id);
-    pipe.position = vec3(1, y, 2);
-    pipe.draw(shader_id);
+    // pipe.rotation.y = DEG2RAD(90);
+    // pipe.position = vec3(-1, y, 2);
+    // pipe.draw(shader_id);
+    // pipe.position = vec3(0, y, 2);
+    // pipe.draw(shader_id);
+    // pipe.position = vec3(1, y, 2);
+    // pipe.draw(shader_id);
 
-    pipe.rotation.y = DEG2RAD(0);
-    pipe.position = vec3(2, y, 1);
-    pipe.draw(shader_id);
-    pipe.position = vec3(2, y, 0);
-    pipe.draw(shader_id);
-    pipe.position = vec3(2, y, -1);
-    pipe.draw(shader_id);
+    // pipe.rotation.y = DEG2RAD(0);
+    // pipe.position = vec3(2, y, 1);
+    // pipe.draw(shader_id);
+    // pipe.position = vec3(2, y, 0);
+    // pipe.draw(shader_id);
+    // pipe.position = vec3(2, y, -1);
+    // pipe.draw(shader_id);
 
-    pipe_right.position = vec3(2, y, 2);
-    pipe_right.rotation.y = DEG2RAD(180);
-    pipe_right.draw(shader_id);
+    // pipe_right.position = vec3(2, y, 2);
+    // pipe_right.rotation.y = DEG2RAD(180);
+    // pipe_right.draw(shader_id);
 
-    pipe_down.position = vec3(-2, y, 2);
-    pipe_down.rotation.y = DEG2RAD(90);
-    pipe_down.draw(shader_id);
-    pipe_down.position = vec3(2, y, -2);
-    pipe_down.rotation.y = DEG2RAD(0);
-    pipe_down.draw(shader_id);
+    // pipe_down.position = vec3(-2, y, 2);
+    // pipe_down.rotation.y = DEG2RAD(90);
+    // pipe_down.draw(shader_id);
+    // pipe_down.position = vec3(2, y, -2);
+    // pipe_down.rotation.y = DEG2RAD(0);
+    // pipe_down.draw(shader_id);
 }
 
 void Session::load_glsl_helpers() {
@@ -262,15 +262,16 @@ void Session::load_glsl_helpers() {
 }
 
 void Session::load_objects() {
-    sofa = MeshStatic::from_scene("assets/sofa.obj", palette[5]);
-    chair = MeshStatic::from_scene("assets/chair.obj", palette[2]);
-    table = MeshStatic::from_scene("assets/table.obj", palette[1]);
-    desk = MeshStatic::from_scene("assets/desk.obj", palette[0]);
-    bookshelf = MeshStatic::from_scene("assets/bookshelf.obj", palette[5]);
-    room = MeshStatic::from_scene("assets/room.obj", palette[0]);
-    pipe = MeshStatic::from_scene("assets/pipe.obj", palette[0]);
-    pipe_down = MeshStatic::from_scene("assets/pipe_down.obj", palette[0]);
-    pipe_right = MeshStatic::from_scene("assets/pipe_right.obj", palette[0]);
+    // sofa = MeshStatic::from_scene("assets/sofa.obj", palette[5]);
+    // chair = MeshStatic::from_scene("assets/chair.obj", palette[2]);
+    // table = MeshStatic::from_scene("assets/table.obj", palette[1]);
+    // desk = MeshStatic::from_scene("assets/desk.obj", palette[0]);
+    // bookshelf = MeshStatic::from_scene("assets/bookshelf.obj", palette[5]);
+    // room = MeshStatic::from_scene("assets/room.obj", palette[0]);
+    // pipe = MeshStatic::from_scene("assets/pipe.obj", palette[0]);
+    // pipe_down = MeshStatic::from_scene("assets/pipe_down.obj", palette[0]);
+    // pipe_right = MeshStatic::from_scene("assets/pipe_right.obj", palette[0]);
+    monorail = MeshStatic::from_scene("assets/monorail.obj");
 }
 
 void Session::generate_buffers() {

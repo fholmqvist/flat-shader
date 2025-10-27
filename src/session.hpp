@@ -28,6 +28,8 @@ struct Session {
     MeshStatic pipe_down;
     MeshStatic pipe_right;
 
+    MeshStatic monorail;
+
     Shader depth;
     Shader shadows;
     Shader lines;

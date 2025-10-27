@@ -5,14 +5,13 @@
 struct MeshStatic {
     std::vector<Vertex> verts;
     std::vector<u16> indices;
-    vec3 color = vec3(1);
 
     // TODO: These should be in model.
     vec3 position = vec3(0);
     vec3 rotation = vec3(0);
     float scale = 1;
 
-    static MeshStatic from_scene(std::string file, std::optional<vec3> color = std::nullopt);
+    static MeshStatic from_scene(std::string file);
 
     void draw(u32 shader_id);
 
