@@ -85,10 +85,17 @@ void Session::draw_objects(u32 shader_id) {
     monorail.position.z = 8.8;
     monorail.draw(shader_id);
 
+    for (int z = 0; z < 12; z += 2) {
+        for (int x = 2; x < 6; x += 2) {
+            floor.position = vec3(x, 0, z);
+            floor.draw(shader_id);
+        }
+    }
+
     rail.position.x = 0;
     wall.position.x = 0;
     wall.rotation.y = DEG2RAD(0);
-    for (int i = 0; i < 12; i++) {
+    for (int i = 0; i < 12; i += 2) {
         rail.position.z = i;
         rail.draw(shader_id);
 
@@ -99,7 +106,7 @@ void Session::draw_objects(u32 shader_id) {
     rail.position.x = 6;
     wall.position.x = 6;
     wall.rotation.y = DEG2RAD(180);
-    for (int i = 0; i < 12; i++) {
+    for (int i = 0; i < 12; i += 2) {
         rail.position.z = i;
         rail.draw(shader_id);
 
@@ -113,12 +120,12 @@ void Session::draw_objects(u32 shader_id) {
     rail_turn.position = vec3(2, 0, -4);
     rail_turn.rotation.y = DEG2RAD(-90);
     rail_turn.draw(shader_id);
-    rail_turn.position.z = 15;
+    rail_turn.position.z = 14;
     rail_turn.position.x = 4;
     rail_turn.rotation.y = DEG2RAD(90);
     rail_turn.draw(shader_id);
     rail_turn.draw(shader_id);
-    rail_turn.position.z = 11;
+    rail_turn.position.z = 10;
     rail_turn.position.x = 6;
     rail_turn.rotation.y = DEG2RAD(180);
     rail_turn.draw(shader_id);
@@ -201,6 +208,7 @@ void Session::load_objects() {
     rail = MeshStatic::from_scene("assets/rail.obj");
     rail_turn = MeshStatic::from_scene("assets/rail_turn.obj");
     wall = MeshStatic::from_scene("assets/wall.obj");
+    floor = MeshStatic::from_scene("assets/floor.obj");
 }
 
 void Session::generate_buffers() {
