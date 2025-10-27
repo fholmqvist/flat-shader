@@ -199,6 +199,9 @@ void Session::render() {
 }
 
 void Session::draw_objects(u32 shader_id) {
+    monorail.position.x = 0;
+    monorail.draw(shader_id);
+    monorail.position.x = 1;
     monorail.draw(shader_id);
     // sofa.position = vec3(-0.5, 0, 0);
     // sofa.rotation.y = DEG2RAD(0);
