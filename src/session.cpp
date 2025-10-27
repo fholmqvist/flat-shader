@@ -65,70 +65,83 @@ void Session::render() {
 }
 
 void Session::draw_objects(u32 shader_id) {
-    monorail.position.x = 0;
-    monorail.position.z = 2.2;
-    monorail.draw(shader_id);
-    monorail.position.z = 4.4;
-    monorail.draw(shader_id);
-    monorail.position.z = 6.6;
-    monorail.draw(shader_id);
-    monorail.position.z = 8.8;
-    monorail.draw(shader_id);
+    vec3 offset = vec3(0);
 
-    monorail.position.x = 6;
-    monorail.position.z = 2.2;
-    monorail.draw(shader_id);
-    monorail.position.z = 4.4;
-    monorail.draw(shader_id);
-    monorail.position.z = 6.6;
-    monorail.draw(shader_id);
-    monorail.position.z = 8.8;
-    monorail.draw(shader_id);
+    for (int wz = 0; wz < 4; wz++) {
+        for (int wx = 0; wx < 8; wx++) {
+            monorail.position.x = 0 + offset.x;
+            monorail.position.z = 1.1 + offset.z;
+            monorail.draw(shader_id);
+            monorail.position.z = 2.2 + offset.z;
+            monorail.draw(shader_id);
+            monorail.position.z = 3.3 + offset.z;
+            monorail.draw(shader_id);
+            monorail.position.z = 4.4 + offset.z;
+            monorail.draw(shader_id);
 
-    for (int z = 0; z < 12; z += 2) {
-        for (int x = 2; x < 6; x += 2) {
-            floor.position = vec3(x, 0, z);
-            floor.draw(shader_id);
+            monorail.position.x = 3 + offset.x;
+            monorail.position.z = 1.1 + offset.z;
+            monorail.draw(shader_id);
+            monorail.position.z = 2.2 + offset.z;
+            monorail.draw(shader_id);
+            monorail.position.z = 3.3 + offset.z;
+            monorail.draw(shader_id);
+            monorail.position.z = 4.4 + offset.z;
+            monorail.draw(shader_id);
+
+            for (int z = 0; z < 6; z++) {
+                for (int x = 1; x < 3; x++) {
+                    floor.position = vec3(x, 0, z) + offset;
+                    floor.draw(shader_id);
+                }
+            }
+
+            rail.position.x = 0 + offset.x;
+            wall.position.x = 0 + offset.x;
+            wall.rotation.y = DEG2RAD(0);
+            for (int i = 0; i < 6; i++) {
+                rail.position.z = i + offset.z;
+                rail.draw(shader_id);
+
+                wall.position.z = i + offset.z;
+                wall.draw(shader_id);
+            }
+
+            rail.position.x = 3 + offset.x;
+            wall.position.x = 3 + offset.x;
+            wall.rotation.y = DEG2RAD(180);
+            for (int i = 0; i < 6; i++) {
+                rail.position.z = i + offset.z;
+                rail.draw(shader_id);
+
+                wall.position.z = i + offset.z;
+                wall.draw(shader_id);
+            }
+
+            rail_turn.position = vec3(0) + offset;
+            rail_turn.rotation = vec3(0);
+            rail_turn.draw(shader_id);
+            rail_turn.position = vec3(1, 0, -2) + offset;
+            rail_turn.rotation.y = DEG2RAD(-90);
+            rail_turn.draw(shader_id);
+            rail_turn.position.z = 7;
+            rail_turn.position.x = 2;
+            rail_turn.position += offset;
+            rail_turn.rotation.y = DEG2RAD(90);
+            rail_turn.draw(shader_id);
+            rail_turn.draw(shader_id);
+            rail_turn.position.z = 5;
+            rail_turn.position.x = 3;
+            rail_turn.position += offset;
+            rail_turn.rotation.y = DEG2RAD(180);
+            rail_turn.draw(shader_id);
+
+            offset.x += 4;
         }
+
+        offset.x = 0;
+        offset.z += 10;
     }
-
-    rail.position.x = 0;
-    wall.position.x = 0;
-    wall.rotation.y = DEG2RAD(0);
-    for (int i = 0; i < 12; i += 2) {
-        rail.position.z = i;
-        rail.draw(shader_id);
-
-        wall.position.z = i;
-        wall.draw(shader_id);
-    }
-
-    rail.position.x = 6;
-    wall.position.x = 6;
-    wall.rotation.y = DEG2RAD(180);
-    for (int i = 0; i < 12; i += 2) {
-        rail.position.z = i;
-        rail.draw(shader_id);
-
-        wall.position.z = i;
-        wall.draw(shader_id);
-    }
-
-    rail_turn.position = vec3(0);
-    rail_turn.rotation = vec3(0);
-    rail_turn.draw(shader_id);
-    rail_turn.position = vec3(2, 0, -4);
-    rail_turn.rotation.y = DEG2RAD(-90);
-    rail_turn.draw(shader_id);
-    rail_turn.position.z = 14;
-    rail_turn.position.x = 4;
-    rail_turn.rotation.y = DEG2RAD(90);
-    rail_turn.draw(shader_id);
-    rail_turn.draw(shader_id);
-    rail_turn.position.z = 10;
-    rail_turn.position.x = 6;
-    rail_turn.rotation.y = DEG2RAD(180);
-    rail_turn.draw(shader_id);
 
     // sofa.position = vec3(-0.5, 0, 0);
     // sofa.rotation.y = DEG2RAD(0);
