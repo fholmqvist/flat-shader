@@ -33,6 +33,7 @@ struct Session {
 
     MeshStatic monorail;
     MeshStatic rail;
+    MeshStatic rail_turn;
 
     Shader depth;
     Shader shadows;
@@ -48,5 +49,6 @@ struct Session {
   private:
     void load_glsl_helpers();
     void generate_buffers();
+    void init_shaders();
     void load_objects();
 };

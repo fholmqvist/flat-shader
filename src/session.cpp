@@ -36,8 +36,253 @@ Session::Session() {
 
     textures.add("palette", "assets/antiquity16.png", GL_RGB);
 
-    camera.pos = { 2.4, 5.7, 2.7 };
-    camera.rot = { 225, -60 };
+    // camera.pos = { 2.4, 5.7, 2.7 };
+    // camera.rot = { 225, -60 };
+
+    camera.pos = { 9, 10, 14 };
+    camera.rot = { 225, -40 };
+
+    init_shaders();
+
+    log_info("Started in %s (total)", time_to_string(timer.stop()).c_str());
+}
+
+void Session::update() {
+    window.update();
+    running = input.update(camera);
+    camera.update();
+}
+
+void Session::render() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    depth.render(*this);
+    shadows.render(*this);
+    lines.render(*this);
+    fxaa.render(*this);
+
+    window.swap();
+}
+
+void Session::draw_objects(u32 shader_id) {
+    monorail.position.z = 2.2;
+    monorail.draw(shader_id);
+    monorail.position.z = 4.4;
+    monorail.draw(shader_id);
+    monorail.position.z = 6.6;
+    monorail.draw(shader_id);
+    monorail.position.z = 8.8;
+    monorail.draw(shader_id);
+
+    rail.position.x = 0;
+    for (int z = 0; z < 12; z++) {
+        rail.position.z = z;
+        rail.draw(shader_id);
+    }
+
+    rail.position.x = 6;
+    for (int z = 0; z < 12; z++) {
+        rail.position.z = z;
+        rail.draw(shader_id);
+    }
+
+    rail_turn.position = vec3(0);
+    rail_turn.rotation = vec3(0);
+    rail_turn.draw(shader_id);
+    rail_turn.position  = vec3(2.5, 0, -3.5);
+    rail_turn.rotation.y = DEG2RAD(-90);
+    rail_turn.draw(shader_id);
+    rail_turn.position.z = 14.5;
+    rail_turn.position.x = 3.5;
+    rail_turn.rotation.y = DEG2RAD(90);
+    rail_turn.draw(shader_id);
+    rail_turn.draw(shader_id);
+    rail_turn.position.z = 11;
+    rail_turn.position.x = 6;
+    rail_turn.rotation.y = DEG2RAD(180);
+    rail_turn.draw(shader_id);
+
+    // sofa.position = vec3(-0.5, 0, 0);
+    // sofa.rotation.y = DEG2RAD(0);
+    // sofa.draw(shader_id);
+    // sofa.position = vec3(0.5, 0, 0);
+    // sofa.rotation.y = DEG2RAD(180);
+    // sofa.draw(shader_id);
+
+    // table.draw(shader_id);
+
+    // chair.position = vec3(0, 0, -1);
+    // chair.rotation.y = DEG2RAD(-90);
+    // chair.draw(shader_id);
+
+    // chair.position = vec3(0, 0, 0.6);
+    // chair.rotation.y = DEG2RAD(90);
+    // chair.draw(shader_id);
+
+    // desk.position = vec3(0, 0, -0.7);
+    // desk.rotation.y = DEG2RAD(-90);
+    // desk.draw(shader_id);
+
+    // bookshelf.position = vec3(-1, 0, -0.5);
+    // bookshelf.draw(shader_id);
+
+    // room.position.x = 0;
+    // room.position.z = 0.1;
+    // room.draw(shader_id);
+
+    // const float y = 0.5;
+
+    // pipe.rotation.y = DEG2RAD(90);
+    // pipe.position = vec3(-1, y, 2);
+    // pipe.draw(shader_id);
+    // pipe.position = vec3(0, y, 2);
+    // pipe.draw(shader_id);
+    // pipe.position = vec3(1, y, 2);
+    // pipe.draw(shader_id);
+
+    // pipe.rotation.y = DEG2RAD(0);
+    // pipe.position = vec3(2, y, 1);
+    // pipe.draw(shader_id);
+    // pipe.position = vec3(2, y, 0);
+    // pipe.draw(shader_id);
+    // pipe.position = vec3(2, y, -1);
+    // pipe.draw(shader_id);
+
+    // pipe_right.position = vec3(2, y, 2);
+    // pipe_right.rotation.y = DEG2RAD(180);
+    // pipe_right.draw(shader_id);
+
+    // pipe_down.position = vec3(-2, y, 2);
+    // pipe_down.rotation.y = DEG2RAD(90);
+    // pipe_down.draw(shader_id);
+    // pipe_down.position = vec3(2, y, -2);
+    // pipe_down.rotation.y = DEG2RAD(0);
+    // pipe_down.draw(shader_id);
+}
+
+void Session::load_glsl_helpers() {
+    store_glsl_helper("assets/model.glsl");
+    store_glsl_helper("assets/lights.glsl");
+    store_glsl_helper("assets/lights_calc.glsl");
+}
+
+void Session::load_objects() {
+    // sofa = MeshStatic::from_scene("assets/sofa.obj", palette[5]);
+    // chair = MeshStatic::from_scene("assets/chair.obj", palette[2]);
+    // table = MeshStatic::from_scene("assets/table.obj", palette[1]);
+    // desk = MeshStatic::from_scene("assets/desk.obj", palette[0]);
+    // bookshelf = MeshStatic::from_scene("assets/bookshelf.obj", palette[5]);
+    // room = MeshStatic::from_scene("assets/room.obj", palette[0]);
+    // pipe = MeshStatic::from_scene("assets/pipe.obj", palette[0]);
+    // pipe_down = MeshStatic::from_scene("assets/pipe_down.obj", palette[0]);
+    // pipe_right = MeshStatic::from_scene("assets/pipe_right.obj", palette[0]);
+    monorail = MeshStatic::from_scene("assets/monorail.obj");
+    rail = MeshStatic::from_scene("assets/rail.obj");
+    rail_turn = MeshStatic::from_scene("assets/rail_turn.obj");
+}
+
+void Session::generate_buffers() {
+    {
+        glGenFramebuffers(1, &shadow_fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
+
+        glGenTextures(1, &shadow_depth);
+        glBindTexture(GL_TEXTURE_2D, shadow_depth);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, SHADOW_SIZE, SHADOW_SIZE, 0,
+                     GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadow_depth, 0);
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            log_dang("Shadow framebuffer not complete");
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
+    {
+        glGenFramebuffers(1, &color_fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, color_fbo);
+
+        glGenTextures(1, &color_depth);
+        glBindTexture(GL_TEXTURE_2D, color_depth);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, SCREEN_W, SCREEN_H, 0,
+                     GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, color_depth, 0);
+
+        glGenTextures(1, &color_sector);
+        glBindTexture(GL_TEXTURE_2D, color_sector);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_sector,
+                               0);
+
+        glGenTextures(1, &color_texture);
+        glBindTexture(GL_TEXTURE_2D, color_texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, color_texture,
+                               0);
+
+        GLenum attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+        glDrawBuffers(2, attachments);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            log_dang("Framebuffer not complete");
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
+    {
+        glGenFramebuffers(1, &lines_fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, lines_fbo);
+
+        glGenRenderbuffers(1, &lines_depth);
+        glBindRenderbuffer(GL_RENDERBUFFER, lines_depth);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, SCREEN_W, SCREEN_H);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
+                                  lines_depth);
+
+        glGenTextures(1, &lines_texture);
+        glBindTexture(GL_TEXTURE_2D, lines_texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, lines_texture,
+                               0);
+
+        GLenum attachments[1] = { GL_COLOR_ATTACHMENT0 };
+        glDrawBuffers(1, attachments);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            log_dang("Framebuffer not complete");
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+}
+
+void Session::init_shaders() {
 
     depth = Shader(
         "assets/depth.vs", "assets/depth.fs",
@@ -175,228 +420,4 @@ Session::Session() {
     shadows.init();
     lines.init();
     fxaa.init();
-
-    log_info("Started in %s (total)", time_to_string(timer.stop()).c_str());
-}
-
-void Session::update() {
-    window.update();
-    running = input.update(camera);
-    camera.update();
-}
-
-void Session::render() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    depth.render(*this);
-    shadows.render(*this);
-    lines.render(*this);
-    fxaa.render(*this);
-
-    window.swap();
-}
-
-void Session::draw_objects(u32 shader_id) {
-    monorail.position.z = 0;
-    monorail.draw(shader_id);
-    monorail.position.z = 2.2;
-    monorail.draw(shader_id);
-    monorail.position.z = 4.4;
-    monorail.draw(shader_id);
-    monorail.position.z = 6.6;
-    monorail.draw(shader_id);
-    monorail.position.z = 8.8;
-    monorail.draw(shader_id);
-
-    rail.position.z = -2;
-    rail.draw(shader_id);
-    rail.position.z = 0;
-    rail.draw(shader_id);
-    rail.position.z = 2;
-    rail.draw(shader_id);
-    rail.position.z = 4;
-    rail.draw(shader_id);
-    rail.position.z = 6;
-    rail.draw(shader_id);
-    rail.position.z = 8;
-    rail.draw(shader_id);
-    rail.position.z = 10;
-    rail.draw(shader_id);
-    // sofa.position = vec3(-0.5, 0, 0);
-    // sofa.rotation.y = DEG2RAD(0);
-    // sofa.draw(shader_id);
-    // sofa.position = vec3(0.5, 0, 0);
-    // sofa.rotation.y = DEG2RAD(180);
-    // sofa.draw(shader_id);
-
-    // table.draw(shader_id);
-
-    // chair.position = vec3(0, 0, -1);
-    // chair.rotation.y = DEG2RAD(-90);
-    // chair.draw(shader_id);
-
-    // chair.position = vec3(0, 0, 0.6);
-    // chair.rotation.y = DEG2RAD(90);
-    // chair.draw(shader_id);
-
-    // desk.position = vec3(0, 0, -0.7);
-    // desk.rotation.y = DEG2RAD(-90);
-    // desk.draw(shader_id);
-
-    // bookshelf.position = vec3(-1, 0, -0.5);
-    // bookshelf.draw(shader_id);
-
-    // room.position.x = 0;
-    // room.position.z = 0.1;
-    // room.draw(shader_id);
-
-    // const float y = 0.5;
-
-    // pipe.rotation.y = DEG2RAD(90);
-    // pipe.position = vec3(-1, y, 2);
-    // pipe.draw(shader_id);
-    // pipe.position = vec3(0, y, 2);
-    // pipe.draw(shader_id);
-    // pipe.position = vec3(1, y, 2);
-    // pipe.draw(shader_id);
-
-    // pipe.rotation.y = DEG2RAD(0);
-    // pipe.position = vec3(2, y, 1);
-    // pipe.draw(shader_id);
-    // pipe.position = vec3(2, y, 0);
-    // pipe.draw(shader_id);
-    // pipe.position = vec3(2, y, -1);
-    // pipe.draw(shader_id);
-
-    // pipe_right.position = vec3(2, y, 2);
-    // pipe_right.rotation.y = DEG2RAD(180);
-    // pipe_right.draw(shader_id);
-
-    // pipe_down.position = vec3(-2, y, 2);
-    // pipe_down.rotation.y = DEG2RAD(90);
-    // pipe_down.draw(shader_id);
-    // pipe_down.position = vec3(2, y, -2);
-    // pipe_down.rotation.y = DEG2RAD(0);
-    // pipe_down.draw(shader_id);
-}
-
-void Session::load_glsl_helpers() {
-    store_glsl_helper("assets/model.glsl");
-    store_glsl_helper("assets/lights.glsl");
-    store_glsl_helper("assets/lights_calc.glsl");
-}
-
-void Session::load_objects() {
-    // sofa = MeshStatic::from_scene("assets/sofa.obj", palette[5]);
-    // chair = MeshStatic::from_scene("assets/chair.obj", palette[2]);
-    // table = MeshStatic::from_scene("assets/table.obj", palette[1]);
-    // desk = MeshStatic::from_scene("assets/desk.obj", palette[0]);
-    // bookshelf = MeshStatic::from_scene("assets/bookshelf.obj", palette[5]);
-    // room = MeshStatic::from_scene("assets/room.obj", palette[0]);
-    // pipe = MeshStatic::from_scene("assets/pipe.obj", palette[0]);
-    // pipe_down = MeshStatic::from_scene("assets/pipe_down.obj", palette[0]);
-    // pipe_right = MeshStatic::from_scene("assets/pipe_right.obj", palette[0]);
-    monorail = MeshStatic::from_scene("assets/monorail.obj");
-    rail = MeshStatic::from_scene("assets/rail.obj");
-}
-
-void Session::generate_buffers() {
-    {
-        glGenFramebuffers(1, &shadow_fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
-
-        glGenTextures(1, &shadow_depth);
-        glBindTexture(GL_TEXTURE_2D, shadow_depth);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, SHADOW_SIZE, SHADOW_SIZE, 0,
-                     GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadow_depth, 0);
-        glDrawBuffer(GL_NONE);
-        glReadBuffer(GL_NONE);
-
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-            log_dang("Shadow framebuffer not complete");
-        }
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    }
-
-    {
-        glGenFramebuffers(1, &color_fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, color_fbo);
-
-        glGenTextures(1, &color_depth);
-        glBindTexture(GL_TEXTURE_2D, color_depth);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, SCREEN_W, SCREEN_H, 0,
-                     GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, color_depth, 0);
-
-        glGenTextures(1, &color_sector);
-        glBindTexture(GL_TEXTURE_2D, color_sector);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_sector,
-                               0);
-
-        glGenTextures(1, &color_texture);
-        glBindTexture(GL_TEXTURE_2D, color_texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, color_texture,
-                               0);
-
-        GLenum attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-        glDrawBuffers(2, attachments);
-
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-            log_dang("Framebuffer not complete");
-        }
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    }
-
-    {
-        glGenFramebuffers(1, &lines_fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, lines_fbo);
-
-        glGenRenderbuffers(1, &lines_depth);
-        glBindRenderbuffer(GL_RENDERBUFFER, lines_depth);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, SCREEN_W, SCREEN_H);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
-                                  lines_depth);
-
-        glGenTextures(1, &lines_texture);
-        glBindTexture(GL_TEXTURE_2D, lines_texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, lines_texture,
-                               0);
-
-        GLenum attachments[1] = { GL_COLOR_ATTACHMENT0 };
-        glDrawBuffers(1, attachments);
-
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-            log_dang("Framebuffer not complete");
-        }
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    }
 }
