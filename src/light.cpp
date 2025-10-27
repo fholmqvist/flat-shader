@@ -5,7 +5,7 @@
 
 int SHADOW_SIZE = 4096 * 2;
 
-vec3 LIGHT_DIR = vec3(0.25, -1, 1);
+vec3 LIGHT_DIR = vec3(-0.25, -1, 1);
 mat4 LIGHT_SPACE;
 
 std::vector<vec3> get_camera_frustum_corners(mat4 proj, mat4 view) {

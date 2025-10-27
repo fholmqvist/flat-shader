@@ -34,6 +34,7 @@ struct Session {
     MeshStatic monorail;
     MeshStatic rail;
     MeshStatic rail_turn;
+    MeshStatic wall;
 
     Shader depth;
     Shader shadows;

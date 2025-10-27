@@ -39,7 +39,7 @@ Session::Session() {
     // camera.pos = { 2.4, 5.7, 2.7 };
     // camera.rot = { 225, -60 };
 
-    camera.pos = { 9, 10, 14 };
+    camera.pos = { 11, 10, 16 };
     camera.rot = { 225, -40 };
 
     init_shaders();
@@ -65,6 +65,17 @@ void Session::render() {
 }
 
 void Session::draw_objects(u32 shader_id) {
+    monorail.position.x = 0;
+    monorail.position.z = 2.2;
+    monorail.draw(shader_id);
+    monorail.position.z = 4.4;
+    monorail.draw(shader_id);
+    monorail.position.z = 6.6;
+    monorail.draw(shader_id);
+    monorail.position.z = 8.8;
+    monorail.draw(shader_id);
+
+    monorail.position.x = 6;
     monorail.position.z = 2.2;
     monorail.draw(shader_id);
     monorail.position.z = 4.4;
@@ -75,25 +86,35 @@ void Session::draw_objects(u32 shader_id) {
     monorail.draw(shader_id);
 
     rail.position.x = 0;
-    for (int z = 0; z < 12; z++) {
-        rail.position.z = z;
+    wall.position.x = 0;
+    wall.rotation.y = DEG2RAD(0);
+    for (int i = 0; i < 12; i++) {
+        rail.position.z = i;
         rail.draw(shader_id);
+
+        wall.position.z = i;
+        wall.draw(shader_id);
     }
 
     rail.position.x = 6;
-    for (int z = 0; z < 12; z++) {
-        rail.position.z = z;
+    wall.position.x = 6;
+    wall.rotation.y = DEG2RAD(180);
+    for (int i = 0; i < 12; i++) {
+        rail.position.z = i;
         rail.draw(shader_id);
+
+        wall.position.z = i;
+        wall.draw(shader_id);
     }
 
     rail_turn.position = vec3(0);
     rail_turn.rotation = vec3(0);
     rail_turn.draw(shader_id);
-    rail_turn.position  = vec3(2.5, 0, -3.5);
+    rail_turn.position = vec3(2, 0, -4);
     rail_turn.rotation.y = DEG2RAD(-90);
     rail_turn.draw(shader_id);
-    rail_turn.position.z = 14.5;
-    rail_turn.position.x = 3.5;
+    rail_turn.position.z = 15;
+    rail_turn.position.x = 4;
     rail_turn.rotation.y = DEG2RAD(90);
     rail_turn.draw(shader_id);
     rail_turn.draw(shader_id);
@@ -179,6 +200,7 @@ void Session::load_objects() {
     monorail = MeshStatic::from_scene("assets/monorail.obj");
     rail = MeshStatic::from_scene("assets/rail.obj");
     rail_turn = MeshStatic::from_scene("assets/rail_turn.obj");
+    wall = MeshStatic::from_scene("assets/wall.obj");
 }
 
 void Session::generate_buffers() {
