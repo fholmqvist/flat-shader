@@ -136,6 +136,9 @@ void Session::draw_objects(u32 shader_id) {
             rail_turn.rotation.y = DEG2RAD(180);
             rail_turn.draw(shader_id);
 
+            seagull.position = offset;
+            seagull.draw(shader_id);
+
             offset.x += 4;
         }
 
@@ -222,6 +225,7 @@ void Session::load_objects() {
     rail_turn = MeshStatic::from_scene("assets/rail_turn.obj");
     wall = MeshStatic::from_scene("assets/wall.obj");
     floor = MeshStatic::from_scene("assets/floor.obj");
+    seagull = MeshStatic::from_scene("assets/seagull.obj");
 }
 
 void Session::generate_buffers() {
