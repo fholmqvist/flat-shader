@@ -9,6 +9,8 @@ static std::random_device rd;
 static std::mt19937 gen(rd());
 static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
+int TRIANGLES_DRAWN = 0;
+
 MeshStatic MeshStatic::from_scene(std::string file) {
     Assimp::Importer import;
 
@@ -88,7 +90,10 @@ void MeshStatic::draw(u32 shader_id) {
     gl_buffer_data();
     gl_uniforms(shader_id);
 
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, 0);
+    const int faces = indices.size();
+    glDrawElements(GL_TRIANGLES, faces, GL_UNSIGNED_SHORT, 0);
+
+    TRIANGLES_DRAWN += faces;
 }
 
 void MeshStatic::apply_perlin(vec3 wpos, vec3 strength) {

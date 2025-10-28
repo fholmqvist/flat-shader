@@ -2,6 +2,8 @@
 
 #include "vertex.hpp"
 
+extern int TRIANGLES_DRAWN;
+
 struct MeshStatic {
     std::vector<Vertex> verts;
     std::vector<u16> indices;

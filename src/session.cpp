@@ -1,3 +1,4 @@
+#include "mesh_static.hpp"
 #include "pch.hpp"
 
 #include "session.hpp"
@@ -55,6 +56,7 @@ void Session::update() {
 
 void Session::render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    TRIANGLES_DRAWN = 0;
 
     depth.render(*this);
     shadows.render(*this);
