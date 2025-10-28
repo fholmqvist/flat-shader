@@ -132,9 +132,18 @@ void Session::draw_objects(u32 shader_id) {
     seagull.position = vec3(1, 0, 1);
     seagull.rotation.y = DEG2RAD(0);
     seagull.draw(shader_id);
+    sunglasses.position = vec3(1, 0, 1);
+    sunglasses.draw(shader_id);
+
     seagull.position = vec3(0.9, 0, 1.2);
     seagull.rotation.y = DEG2RAD(110);
     seagull.draw(shader_id);
+
+    bar_table_round.position = vec3(1.05, 0, 1.1);
+    bar_table_round.draw(shader_id);
+
+    wineglass.position = vec3(1.03, 0, 1.08);
+    wineglass.draw(shader_id);
 }
 
 void Session::load_glsl_helpers() {
@@ -151,6 +160,12 @@ void Session::load_objects() {
     floor = MeshStatic::from_scene("assets/floor.obj");
     seagull = MeshStatic::from_scene("assets/seagull.obj");
     seagull.scale = 0.5;
+    sunglasses = MeshStatic::from_scene("assets/sunglasses.obj");
+    sunglasses.scale = 0.5;
+    bar_table_round = MeshStatic::from_scene("assets/bar_table_round.obj");
+    bar_table_round.scale = 0.5;
+    wineglass = MeshStatic::from_scene("assets/wineglass.obj");
+    wineglass.scale = 0.5;
 }
 
 void Session::generate_buffers() {

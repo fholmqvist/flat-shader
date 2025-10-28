@@ -26,6 +26,9 @@ struct Session {
     MeshStatic wall;
     MeshStatic floor;
     MeshStatic seagull;
+    MeshStatic sunglasses;
+    MeshStatic bar_table_round;
+    MeshStatic wineglass;
 
     Shader depth;
     Shader shadows;

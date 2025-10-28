@@ -13,7 +13,7 @@ out vec4 FragColor;
 float threshold = 0.05;
 const int base_radius = 1;
 
-const vec3 BLACK = vec3(0);
+const vec3 BLACK = vec3(0.02);
 
 const float near = 0.2;
 const float far  = 1;
