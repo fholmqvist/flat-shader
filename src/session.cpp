@@ -130,6 +130,10 @@ void Session::draw_objects(u32 shader_id) {
     rail_turn.draw(shader_id);
 
     seagull.position = vec3(1, 0, 1);
+    seagull.rotation.y = DEG2RAD(0);
+    seagull.draw(shader_id);
+    seagull.position = vec3(0.9, 0, 1.2);
+    seagull.rotation.y = DEG2RAD(110);
     seagull.draw(shader_id);
 }
 
@@ -146,6 +150,7 @@ void Session::load_objects() {
     wall = MeshStatic::from_scene("assets/wall.obj");
     floor = MeshStatic::from_scene("assets/floor.obj");
     seagull = MeshStatic::from_scene("assets/seagull.obj");
+    seagull.scale = 0.5;
 }
 
 void Session::generate_buffers() {
