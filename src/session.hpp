@@ -20,17 +20,6 @@ struct Session {
 
     Textures textures;
 
-    MeshStatic sofa;
-    MeshStatic chair;
-    MeshStatic table;
-    MeshStatic desk;
-    MeshStatic bookshelf;
-    MeshStatic room;
-
-    MeshStatic pipe;
-    MeshStatic pipe_down;
-    MeshStatic pipe_right;
-
     MeshStatic monorail;
     MeshStatic rail;
     MeshStatic rail_turn;

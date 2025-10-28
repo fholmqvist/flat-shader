@@ -37,11 +37,8 @@ Session::Session() {
 
     textures.add("palette", "assets/antiquity16.png", GL_RGB);
 
-    // camera.pos = { 2.4, 5.7, 2.7 };
-    // camera.rot = { 225, -60 };
-
-    camera.pos = { 11, 10, 16 };
-    camera.rot = { 225, -40 };
+    camera.pos = { 5, 4, 6 };
+    camera.rot = { 220, -30 };
 
     init_shaders();
 
@@ -67,143 +64,73 @@ void Session::render() {
 }
 
 void Session::draw_objects(u32 shader_id) {
-    vec3 offset = vec3(0);
+    monorail.position.x = 0;
+    monorail.position.z = 1.1;
+    monorail.draw(shader_id);
+    monorail.position.z = 2.2;
+    monorail.draw(shader_id);
+    monorail.position.z = 3.3;
+    monorail.draw(shader_id);
+    monorail.position.z = 4.4;
+    monorail.draw(shader_id);
 
-    for (int wz = 0; wz < 4; wz++) {
-        for (int wx = 0; wx < 8; wx++) {
-            monorail.position.x = 0 + offset.x;
-            monorail.position.z = 1.1 + offset.z;
-            monorail.draw(shader_id);
-            monorail.position.z = 2.2 + offset.z;
-            monorail.draw(shader_id);
-            monorail.position.z = 3.3 + offset.z;
-            monorail.draw(shader_id);
-            monorail.position.z = 4.4 + offset.z;
-            monorail.draw(shader_id);
+    monorail.position.x = 3;
+    monorail.position.z = 1.1;
+    monorail.draw(shader_id);
+    monorail.position.z = 2.2;
+    monorail.draw(shader_id);
+    monorail.position.z = 3.3;
+    monorail.draw(shader_id);
+    monorail.position.z = 4.4;
+    monorail.draw(shader_id);
 
-            monorail.position.x = 3 + offset.x;
-            monorail.position.z = 1.1 + offset.z;
-            monorail.draw(shader_id);
-            monorail.position.z = 2.2 + offset.z;
-            monorail.draw(shader_id);
-            monorail.position.z = 3.3 + offset.z;
-            monorail.draw(shader_id);
-            monorail.position.z = 4.4 + offset.z;
-            monorail.draw(shader_id);
-
-            for (int z = 0; z < 6; z++) {
-                for (int x = 1; x < 3; x++) {
-                    floor.position = vec3(x, 0, z) + offset;
-                    floor.draw(shader_id);
-                }
-            }
-
-            rail.position.x = 0 + offset.x;
-            wall.position.x = 0 + offset.x;
-            wall.rotation.y = DEG2RAD(0);
-            for (int i = 0; i < 6; i++) {
-                rail.position.z = i + offset.z;
-                rail.draw(shader_id);
-
-                wall.position.z = i + offset.z;
-                wall.draw(shader_id);
-            }
-
-            rail.position.x = 3 + offset.x;
-            wall.position.x = 3 + offset.x;
-            wall.rotation.y = DEG2RAD(180);
-            for (int i = 0; i < 6; i++) {
-                rail.position.z = i + offset.z;
-                rail.draw(shader_id);
-
-                wall.position.z = i + offset.z;
-                wall.draw(shader_id);
-            }
-
-            rail_turn.position = vec3(0) + offset;
-            rail_turn.rotation = vec3(0);
-            rail_turn.draw(shader_id);
-            rail_turn.position = vec3(1, 0, -2) + offset;
-            rail_turn.rotation.y = DEG2RAD(-90);
-            rail_turn.draw(shader_id);
-            rail_turn.position.z = 7;
-            rail_turn.position.x = 2;
-            rail_turn.position += offset;
-            rail_turn.rotation.y = DEG2RAD(90);
-            rail_turn.draw(shader_id);
-            rail_turn.draw(shader_id);
-            rail_turn.position.z = 5;
-            rail_turn.position.x = 3;
-            rail_turn.position += offset;
-            rail_turn.rotation.y = DEG2RAD(180);
-            rail_turn.draw(shader_id);
-
-            seagull.position = offset;
-            seagull.draw(shader_id);
-
-            offset.x += 4;
+    for (int z = 0; z < 6; z++) {
+        for (int x = 1; x < 3; x++) {
+            floor.position = vec3(x, 0, z);
+            floor.draw(shader_id);
         }
-
-        offset.x = 0;
-        offset.z += 10;
     }
 
-    // sofa.position = vec3(-0.5, 0, 0);
-    // sofa.rotation.y = DEG2RAD(0);
-    // sofa.draw(shader_id);
-    // sofa.position = vec3(0.5, 0, 0);
-    // sofa.rotation.y = DEG2RAD(180);
-    // sofa.draw(shader_id);
+    rail.position.x = 0;
+    wall.position.x = 0;
+    wall.rotation.y = DEG2RAD(0);
+    for (int i = 0; i < 6; i++) {
+        rail.position.z = i;
+        rail.draw(shader_id);
 
-    // table.draw(shader_id);
+        wall.position.z = i;
+        wall.draw(shader_id);
+    }
 
-    // chair.position = vec3(0, 0, -1);
-    // chair.rotation.y = DEG2RAD(-90);
-    // chair.draw(shader_id);
+    rail.position.x = 3;
+    wall.position.x = 3;
+    wall.rotation.y = DEG2RAD(180);
+    for (int i = 0; i < 6; i++) {
+        rail.position.z = i;
+        rail.draw(shader_id);
 
-    // chair.position = vec3(0, 0, 0.6);
-    // chair.rotation.y = DEG2RAD(90);
-    // chair.draw(shader_id);
+        wall.position.z = i;
+        wall.draw(shader_id);
+    }
 
-    // desk.position = vec3(0, 0, -0.7);
-    // desk.rotation.y = DEG2RAD(-90);
-    // desk.draw(shader_id);
+    rail_turn.position = vec3(0);
+    rail_turn.rotation = vec3(0);
+    rail_turn.draw(shader_id);
+    rail_turn.position = vec3(1, 0, -2);
+    rail_turn.rotation.y = DEG2RAD(-90);
+    rail_turn.draw(shader_id);
+    rail_turn.position.z = 7;
+    rail_turn.position.x = 2;
+    rail_turn.rotation.y = DEG2RAD(90);
+    rail_turn.draw(shader_id);
+    rail_turn.draw(shader_id);
+    rail_turn.position.z = 5;
+    rail_turn.position.x = 3;
+    rail_turn.rotation.y = DEG2RAD(180);
+    rail_turn.draw(shader_id);
 
-    // bookshelf.position = vec3(-1, 0, -0.5);
-    // bookshelf.draw(shader_id);
-
-    // room.position.x = 0;
-    // room.position.z = 0.1;
-    // room.draw(shader_id);
-
-    // const float y = 0.5;
-
-    // pipe.rotation.y = DEG2RAD(90);
-    // pipe.position = vec3(-1, y, 2);
-    // pipe.draw(shader_id);
-    // pipe.position = vec3(0, y, 2);
-    // pipe.draw(shader_id);
-    // pipe.position = vec3(1, y, 2);
-    // pipe.draw(shader_id);
-
-    // pipe.rotation.y = DEG2RAD(0);
-    // pipe.position = vec3(2, y, 1);
-    // pipe.draw(shader_id);
-    // pipe.position = vec3(2, y, 0);
-    // pipe.draw(shader_id);
-    // pipe.position = vec3(2, y, -1);
-    // pipe.draw(shader_id);
-
-    // pipe_right.position = vec3(2, y, 2);
-    // pipe_right.rotation.y = DEG2RAD(180);
-    // pipe_right.draw(shader_id);
-
-    // pipe_down.position = vec3(-2, y, 2);
-    // pipe_down.rotation.y = DEG2RAD(90);
-    // pipe_down.draw(shader_id);
-    // pipe_down.position = vec3(2, y, -2);
-    // pipe_down.rotation.y = DEG2RAD(0);
-    // pipe_down.draw(shader_id);
+    seagull.position = vec3(1, 0, 1);
+    seagull.draw(shader_id);
 }
 
 void Session::load_glsl_helpers() {
@@ -213,15 +140,6 @@ void Session::load_glsl_helpers() {
 }
 
 void Session::load_objects() {
-    // sofa = MeshStatic::from_scene("assets/sofa.obj", palette[5]);
-    // chair = MeshStatic::from_scene("assets/chair.obj", palette[2]);
-    // table = MeshStatic::from_scene("assets/table.obj", palette[1]);
-    // desk = MeshStatic::from_scene("assets/desk.obj", palette[0]);
-    // bookshelf = MeshStatic::from_scene("assets/bookshelf.obj", palette[5]);
-    // room = MeshStatic::from_scene("assets/room.obj", palette[0]);
-    // pipe = MeshStatic::from_scene("assets/pipe.obj", palette[0]);
-    // pipe_down = MeshStatic::from_scene("assets/pipe_down.obj", palette[0]);
-    // pipe_right = MeshStatic::from_scene("assets/pipe_right.obj", palette[0]);
     monorail = MeshStatic::from_scene("assets/monorail.obj");
     rail = MeshStatic::from_scene("assets/rail.obj");
     rail_turn = MeshStatic::from_scene("assets/rail_turn.obj");
